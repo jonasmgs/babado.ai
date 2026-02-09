@@ -58,7 +58,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       const user = await getCurrentUser();
       if (user) {
         const { data } = await supabase
-          .from('users')
+          .from('profiles')
           .select('*')
           .eq('id', user.id)
           .maybeSingle();

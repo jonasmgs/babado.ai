@@ -1,9 +1,17 @@
+import { Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import { Paths, File } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { supabase } from './supabase';
 
-const documentDirectory = Paths.document.uri;
+const getDocumentDirectory = () => {
+  if (Platform.OS === 'web') return null;
+  try {
+    return Paths.document.uri;
+  } catch (e) {
+    return null;
+  }
+};
 
 
 export interface VideoExportOptions {
@@ -21,7 +29,15 @@ export interface VideoExportOptions {
  * In a production app, this would use FFmpeg or a server-side rendering service
  */
 export async function compositeVideo(options: VideoExportOptions): Promise<string> {
-  if (!documentDirectory) {
+  const docDir = getDocumentDirectory();
+  
+  if (Platform.OS === 'web') {
+    console.log('Web environment detected: Simulating video composition without local file system');
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    return 'https://example.com/mock-video.mp4';
+  }
+
+  if (!docDir) {
     throw new Error('Document directory is not available');
   }
 
@@ -34,7 +50,7 @@ export async function compositeVideo(options: VideoExportOptions): Promise<strin
     // For now, we return a mock URI or the background image/color representation
     // in a real app, this would be the actual .mp4 file URI
     const filename = `video_${options.storyId}_${Date.now()}.mp4`;
-    const videoUri = `${documentDirectory}${filename}`;
+    const videoUri = `${docDir}${filename}`;
     
     // Create a dummy file for simulation
     await new File(videoUri).write('Dummy Video Content', {

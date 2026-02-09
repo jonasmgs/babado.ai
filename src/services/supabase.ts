@@ -29,7 +29,7 @@ export async function signUp(email: string, password: string, username: string) 
     if (error) throw error;
 
     if (data.user) {
-      await supabase.from('users').insert({
+      await supabase.from('profiles').insert({
         id: data.user.id,
         email,
         username,
