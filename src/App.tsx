@@ -66,27 +66,62 @@ function AppContent() {
   const { user, fetchUser } = useAuthStore();
 
   useEffect(() => {
-    // Initial session check
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log(`[Auth] Event: ${event}`, session?.user?.id);
+    let mounted = true;
+
+    async function initializeAuth() {
+      console.log('[Auth] Starting initialization...');
       
+      // Safety timeout - hide loader after 5 seconds no matter what
+      const timer = setTimeout(() => {
+        if (mounted) {
+          console.warn('[Auth] Initialization timeout reached');
+          setIsInitializing(false);
+        }
+      }, 5000);
+
       try {
+        // 1. Check current session explicitly
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) throw sessionError;
+
         if (session) {
+          console.log('[Auth] Session found on init');
           await fetchUser();
           setCurrentScreen('Home');
         } else {
+          console.log('[Auth] No session found on init');
           setCurrentScreen('Onboarding');
         }
       } catch (err) {
-        console.error('[Auth] State Change Error:', err);
+        console.error('[Auth] Init Error:', err);
         setCurrentScreen('Login');
       } finally {
-        setIsInitializing(false);
+        if (mounted) {
+          clearTimeout(timer);
+          setIsInitializing(false);
+        }
       }
-    });
+
+      // 2. Set up listener for future changes
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        console.log(`[Auth] Event Change: ${event}`, session?.user?.id);
+        if (event === 'SIGNED_IN' && session) {
+          await fetchUser();
+          setCurrentScreen('Home');
+        } else if (event === 'SIGNED_OUT') {
+          setCurrentScreen('Login');
+        }
+      });
+
+      return subscription;
+    }
+
+    const authPromise = initializeAuth();
 
     return () => {
-      subscription.unsubscribe();
+      mounted = false;
+      authPromise.then(sub => sub?.unsubscribe());
     };
   }, [fetchUser]);
 
