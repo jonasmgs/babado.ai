@@ -66,24 +66,22 @@ function AppContent() {
   const { user, fetchUser } = useAuthStore();
 
   useEffect(() => {
-    async function init() {
-      console.log('[App] Initializing app logic...');
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          await fetchUser();
-          setCurrentScreen('Home');
-        } else {
-          setCurrentScreen('Onboarding');
-        }
-      } catch (err) {
-        console.error('[App] Init Error:', err);
-        setCurrentScreen('Login');
-      } finally {
-        setIsInitializing(false);
+    // Initial session check
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log(`[Auth] Event: ${event}`, session?.user?.id);
+      
+      if (session) {
+        await fetchUser();
+        setCurrentScreen('Home');
+      } else {
+        setCurrentScreen('Onboarding');
       }
-    }
-    init();
+      setIsInitializing(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [fetchUser]);
 
   // Hook for notifications
