@@ -19,22 +19,25 @@ const SLIDES = [
     id: '1',
     title: 'Create Viral Stories',
     description: 'Use the power of AI to transform your ideas into compelling stories that go viral.',
-    icon: 'sparkles',
-    color: colors.primary[600],
+    icon: 'sparkles-outline',
+    color: '#a78bfa',
+    highlight: '#c4b5fd',
   },
   {
     id: '2',
     title: 'AI Narrations',
     description: 'Breathe life into your stories with professional AI voices using ElevenLabs integration.',
-    icon: 'mic',
-    color: colors.secondary[600],
+    icon: 'mic-outline',
+    color: '#22d3ee',
+    highlight: '#67e8f9',
   },
   {
     id: '3',
-    title: 'Mobile Video Editor',
+    title: 'Video Editor',
     description: 'Edit and export videos perfectly formatted for TikTok, Reels, and YouTube Shorts.',
-    icon: 'videocam',
-    color: colors.accent[600],
+    icon: 'videocam-outline',
+    color: '#f472b6',
+    highlight: '#fb7185',
   },
 ];
 
@@ -47,7 +50,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
 
   const handleNext = () => {
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
     if (currentSlideIndex < SLIDES.length - 1) {
       setCurrentSlideIndex(currentSlideIndex + 1);
@@ -59,16 +62,24 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   const slide = SLIDES[currentSlideIndex];
 
   return (
-    <View style={[styles.container, { backgroundColor: slide.color }]}>
-      <View style={styles.topSection}>
-        <View style={styles.iconContainer}>
-          <Ionicons name={slide.icon as any} size={80} color="white" />
-        </View>
-      </View>
+    <View style={styles.container}>
+      {/* Dynamic Background Elements */}
+      <View style={[styles.bgCircle, { top: -100, left: -50, backgroundColor: slide.color, opacity: 0.15 }]} />
+      <View style={[styles.bgCircle, { bottom: -150, right: -100, backgroundColor: slide.highlight, opacity: 0.1 }]} />
 
-      <View style={styles.bottomSection}>
-        <Text style={styles.title}>{slide.title}</Text>
-        <Text style={styles.description}>{slide.description}</Text>
+      <View style={styles.content}>
+        <View style={styles.topSection}>
+          <View style={[styles.iconGlass, { borderColor: slide.color }]}>
+            <View style={[styles.iconInner, { backgroundColor: slide.color + '20' }]}>
+              <Ionicons name={slide.icon as any} size={70} color={slide.color} />
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.textContainer}>
+          <Text style={styles.title}>{slide.title}</Text>
+          <Text style={styles.description}>{slide.description}</Text>
+        </View>
 
         <View style={styles.footer}>
           <View style={styles.indicatorContainer}>
@@ -77,23 +88,23 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
                 key={index}
                 style={[
                   styles.indicator,
-                  currentSlideIndex === index && styles.activeIndicator
+                  currentSlideIndex === index && { width: 24, backgroundColor: slide.color }
                 ]}
               />
             ))}
           </View>
 
           <TouchableOpacity 
-            style={styles.nextBtn}
+            style={[styles.nextBtn, { backgroundColor: slide.color }]}
             onPress={handleNext}
           >
             <Text style={styles.nextBtnText}>
-              {currentSlideIndex === SLIDES.length - 1 ? 'Get Started' : 'Next'}
+              {currentSlideIndex === SLIDES.length - 1 ? 'Start Magic' : 'Continue'}
             </Text>
             <Ionicons 
-              name={currentSlideIndex === SLIDES.length - 1 ? "rocket" : "arrow-forward"} 
+              name={currentSlideIndex === SLIDES.length - 1 ? "flash" : "chevron-forward"} 
               size={20} 
-              color={slide.color} 
+              color="white" 
             />
           </TouchableOpacity>
         </View>
@@ -105,83 +116,90 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: colors.background.primary,
   },
-  topSection: {
+  bgCircle: {
+    position: 'absolute',
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+  },
+  content: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  iconContainer: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  bottomSection: {
-    flex: 1,
-    backgroundColor: 'white',
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
     padding: spacing.xl,
-    alignItems: 'center',
     justifyContent: 'space-between',
   },
+  topSection: {
+    flex: 1.2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconGlass: {
+    width: 180,
+    height: 180,
+    borderRadius: 50,
+    borderWidth: 1,
+    padding: spacing.md,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconInner: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  textContainer: {
+    flex: 0.8,
+    alignItems: 'flex-start',
+  },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 42,
+    fontWeight: '800',
     color: colors.text.primary,
-    textAlign: 'center',
-    marginTop: spacing.md,
+    lineHeight: 48,
+    marginBottom: spacing.md,
   },
   description: {
-    fontSize: 16,
+    fontSize: 18,
     color: colors.text.secondary,
-    textAlign: 'center',
-    lineHeight: 24,
-    marginTop: spacing.md,
+    lineHeight: 28,
   },
   footer: {
-    width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingBottom: spacing.lg,
+    paddingVertical: spacing.xl,
   },
   indicatorContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
   },
   indicator: {
     height: 6,
     width: 6,
     borderRadius: 3,
-    backgroundColor: colors.neutral[300],
-    marginHorizontal: 3,
-  },
-  activeIndicator: {
-    width: 20,
-    backgroundColor: colors.primary[600],
+    backgroundColor: colors.neutral[700],
+    marginHorizontal: 4,
   },
   nextBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'white',
     paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    borderRadius: borderRadius.lg,
-    elevation: 5,
+    paddingHorizontal: spacing.xl,
+    borderRadius: borderRadius.full,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 8,
   },
   nextBtnText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.text.primary,
+    fontSize: 16,
+    fontWeight: '700',
+    color: 'white',
     marginRight: 8,
   },
 });
