@@ -182,8 +182,12 @@ export async function shareAudio(uri: string): Promise<void> {
  */
 export async function downloadAudio(uri: string, fileName: string): Promise<string> {
   try {
-    const docDir = FileSystem.documentDirectory;
+    const docDir = Platform.OS === 'web' ? null : Paths.document.uri;
     if (!docDir) {
+      if (Platform.OS === 'web') {
+        console.log('Audio download requested on web - returning original URI');
+        return uri;
+      }
       throw new Error('Document directory is not available');
     }
     const downloadUri = `${docDir}${fileName}`;

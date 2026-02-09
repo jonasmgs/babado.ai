@@ -70,13 +70,19 @@ function AppContent() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log(`[Auth] Event: ${event}`, session?.user?.id);
       
-      if (session) {
-        await fetchUser();
-        setCurrentScreen('Home');
-      } else {
-        setCurrentScreen('Onboarding');
+      try {
+        if (session) {
+          await fetchUser();
+          setCurrentScreen('Home');
+        } else {
+          setCurrentScreen('Onboarding');
+        }
+      } catch (err) {
+        console.error('[Auth] State Change Error:', err);
+        setCurrentScreen('Login');
+      } finally {
+        setIsInitializing(false);
       }
-      setIsInitializing(false);
     });
 
     return () => {
