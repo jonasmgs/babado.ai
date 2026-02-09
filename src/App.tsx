@@ -144,7 +144,7 @@ function AppContent() {
   };
 
   const renderScreen = () => {
-    const nav = (s: string) => navigate(s);
+    const nav = (s: string, d?: any) => navigate(s, d);
 
     switch (currentScreen) {
       case 'Onboarding': return <OnboardingScreen onComplete={() => setCurrentScreen('Login')} />;

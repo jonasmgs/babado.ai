@@ -16,7 +16,7 @@ import { colors, spacing } from '@/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
 
 interface LoginScreenProps {
-  onNavigate: (screen: string) => void;
+  onNavigate: (screen: string, data?: any) => void;
 }
 
 export default function LoginScreen({ onNavigate }: LoginScreenProps) {
