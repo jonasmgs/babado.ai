@@ -1,7 +1,12 @@
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { supabase } from './supabase';
+
+const documentDirectory = FileSystem.documentDirectory;
+const EncodingType = FileSystem.EncodingType;
+
 export interface VideoExportOptions {
+
   storyId: string;
   userId: string;
   templateId: string;
