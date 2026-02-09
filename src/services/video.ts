@@ -1,9 +1,10 @@
 import * as FileSystem from 'expo-file-system';
+import { Paths, File } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { supabase } from './supabase';
 
-const documentDirectory = FileSystem.documentDirectory;
-const EncodingType = FileSystem.EncodingType;
+const documentDirectory = Paths.document.uri;
+
 
 export interface VideoExportOptions {
 
@@ -36,11 +37,13 @@ export async function compositeVideo(options: VideoExportOptions): Promise<strin
     const videoUri = `${documentDirectory}${filename}`;
     
     // Create a dummy file for simulation
-    await FileSystem.writeAsStringAsync(videoUri, 'Dummy Video Content', {
-      encoding: EncodingType.UTF8,
+    await new File(videoUri).write('Dummy Video Content', {
+      encoding: 'utf8',
     });
     
     return videoUri;
+
+
   } catch (error) {
     console.error('Error compositing video:', error);
     throw new Error('Failed to composite video');

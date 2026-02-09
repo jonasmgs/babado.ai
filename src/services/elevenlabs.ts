@@ -1,9 +1,11 @@
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
+import { Paths, File } from 'expo-file-system';
 import { supabase } from './supabase';
 import { Platform } from 'react-native';
 
 const ELEVENLABS_API_KEY = process.env.EXPO_PUBLIC_ELEVENLABS_API_KEY || '';
+
 
 const ELEVENLABS_API_URL = 'https://api.elevenlabs.io/v1';
 
@@ -52,12 +54,13 @@ export async function generateSpeech(
     throw new Error('ElevenLabs text-to-speech is not supported on web platform');
   }
 
-  const documentDirectory = FileSystem.documentDirectory;
+  const documentDirectory = Paths.document.uri;
   if (!documentDirectory) {
     throw new Error('Document directory is not available');
   }
 
   try {
+
     const defaultSettings: VoiceSettings = {
       stability: 0.5,
       similarity_boost: 0.75,
@@ -86,15 +89,12 @@ export async function generateSpeech(
     const filename = `voice_${Date.now()}.mp3`;
     const fileUri = `${documentDirectory}${filename}`;
 
-    await FileSystem.writeAsStringAsync(
-      fileUri,
-      Buffer.from(response.data).toString('base64'),
-      {
-        encoding: FileSystem.EncodingType.Base64,
-      }
-    );
+    await new File(fileUri).write(Buffer.from(response.data).toString('base64'), {
+      encoding: 'base64',
+    });
 
     return fileUri;
+
   } catch (error) {
     console.error('Error generating speech:', error);
     throw new Error('Failed to generate speech');
@@ -111,14 +111,13 @@ export async function uploadAudioToStorage(
   userId: string
 ): Promise<string> {
   try {
-    const fileInfo = await FileSystem.getInfoAsync(localUri);
-    if (!fileInfo.exists) {
+    const file = new File(localUri);
+    if (!file.exists) {
       throw new Error('Audio file does not exist');
     }
 
-    const base64 = await FileSystem.readAsStringAsync(localUri, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
+    const base64 = await file.base64();
+
 
     const fileName = `${userId}/${storyId}_${Date.now()}.mp3`;
     const { data, error } = await supabase.storage
