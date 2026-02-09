@@ -4,15 +4,8 @@ import { Paths, File } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { supabase } from './supabase';
 
-const getDocumentDirectory = () => {
-  if (Platform.OS === 'web') return null;
-  try {
-    return Paths.document.uri;
-  } catch (e) {
-    return null;
-  }
-};
-
+const documentDirectory = FileSystem.documentDirectory;
+const EncodingType = FileSystem.EncodingType;
 
 export interface VideoExportOptions {
 
