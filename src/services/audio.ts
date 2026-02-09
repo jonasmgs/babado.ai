@@ -1,4 +1,7 @@
 import * as FileSystem from 'expo-file-system';
+import { Paths, File, Directory } from 'expo-file-system';
+
+
 import * as Sharing from 'expo-sharing';
 import { Audio } from 'expo-av';
 import { Platform } from 'react-native';
@@ -179,37 +182,33 @@ export async function shareAudio(uri: string): Promise<void> {
  */
 export async function downloadAudio(uri: string, fileName: string): Promise<string> {
   try {
-    const docDir = FileSystem.documentDirectory;
+    const docDir = Paths.document.uri;
     if (!docDir) {
       throw new Error('Document directory is not available');
     }
     const downloadUri = `${docDir}${fileName}`;
-
 
     if (Platform.OS === 'web') {
       console.log('Audio download skipped on web:', uri);
       return uri;
     }
 
-    const downloadResult = await FileSystem.downloadAsync(uri, downloadUri);
-
-    if (downloadResult.status !== 200) {
-      throw new Error('Download failed');
-    }
-
-    return downloadResult.uri;
+    const downloadedFile = await File.downloadFileAsync(uri, new File(downloadUri));
+    return downloadedFile.uri;
   } catch (error) {
     console.error('Error downloading audio:', error);
     throw new Error('Failed to download audio');
   }
 }
 
+
 /**
  * Get audio file info
  */
-export async function getAudioInfo(uri: string): Promise<FileSystem.FileInfo | null> {
+export async function getAudioInfo(uri: string) {
   try {
-    return await FileSystem.getInfoAsync(uri);
+    const file = new File(uri);
+    return file.info();
   } catch (error) {
     console.error('Error getting audio info:', error);
     return null;
@@ -221,12 +220,16 @@ export async function getAudioInfo(uri: string): Promise<FileSystem.FileInfo | n
  */
 export async function deleteAudio(uri: string): Promise<void> {
   try {
-    await FileSystem.deleteAsync(uri, { idempotent: true });
+    const file = new File(uri);
+    if (file.exists) {
+      file.delete();
+    }
   } catch (error) {
     console.error('Error deleting audio:', error);
     throw new Error('Failed to delete audio');
   }
 }
+
 
 /**
  * Format duration (milliseconds to MM:SS)

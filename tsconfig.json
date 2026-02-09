@@ -3,7 +3,9 @@
   "compilerOptions": {
     "strict": true,
     "esModuleInterop": true,
+    "skipLibCheck": true,
     "moduleResolution": "node",
+
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
@@ -18,9 +20,6 @@
       "@constants/*": ["src/constants/*"]
     }
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.d.ts"
-  ]
+  "include": ["**/*.ts", "**/*.tsx", "**/*.d.ts"],
+  "exclude": ["node_modules"]
 }

@@ -1,14 +1,17 @@
-import I18n from 'i18n-js';
+import { I18n } from 'i18n-js';
 import translations from './translations';
 
-(I18n as any).translations = translations;
-(I18n as any).defaultLocale = 'en';
-(I18n as any).locale = 'en';
+const i18n = new I18n(translations);
+
+i18n.defaultLocale = 'en';
+i18n.locale = 'en';
+i18n.enableFallback = true;
 
 export const setLanguage = (locale: 'en' | 'pt') => {
-  (I18n as any).locale = locale;
+  i18n.locale = locale;
 };
 
-export const t = (key: string) => (I18n as any).t(key);
+export const t = (key: string, options?: any) => i18n.t(key, options);
 
-export default I18n;
+export default i18n;
+
