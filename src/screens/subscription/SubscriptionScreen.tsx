@@ -4,13 +4,16 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  FlatList,
+  StyleSheet,
+  SafeAreaView,
+  StatusBar,
 } from 'react-native';
 import { t } from '@/i18n';
 import { colors, spacing } from '@/constants/colors';
+import { Ionicons } from '@expo/vector-icons';
 
 interface SubscriptionScreenProps {
-  onNavigate: (screen: string) => void;
+  onNavigate: (screen: string, data?: any) => void;
 }
 
 const plans = [
@@ -49,85 +52,45 @@ const plans = [
 
 export default function SubscriptionScreen({ onNavigate }: SubscriptionScreenProps) {
   const handleSubscribe = (planId: string) => {
-    onNavigate('Payment');
+    onNavigate('Payment', { planId });
   };
 
   const PlanCard = ({ plan }: any) => (
-    <View
-      style={{
-        backgroundColor: colors.background.primary,
-        borderRadius: spacing.lg,
-        paddingHorizontal: spacing.lg,
-        paddingVertical: spacing.xl,
-        marginHorizontal: spacing.md,
-        marginBottom: spacing.lg,
-        borderWidth: 2,
-        borderColor: plan.popular ? colors.primary[600] : colors.neutral[200],
-        position: 'relative',
-      }}
-    >
+    <View style={[styles.planCard, plan.popular && styles.popularCard]}>
       {plan.popular && (
-        <View
-          style={{
-            position: 'absolute',
-            top: -12,
-            left: spacing.lg,
-            backgroundColor: colors.primary[600],
-            paddingHorizontal: spacing.md,
-            paddingVertical: spacing.sm,
-            borderRadius: spacing.md,
-          }}
-        >
-          <Text style={{ color: 'white', fontSize: 12, fontWeight: '600' }}>Most Popular</Text>
+        <View style={styles.popularBadge}>
+          <Text style={styles.popularText}>MOST POPULAR</Text>
         </View>
       )}
 
-      <Text
-        style={{
-          fontSize: 20,
-          fontWeight: 'bold',
-          color: colors.text.primary,
-          marginBottom: spacing.sm,
-          marginTop: plan.popular ? spacing.md : 0,
-        }}
-      >
-        {plan.name}
-      </Text>
-
-      <View style={{ marginBottom: spacing.lg }}>
-        <Text style={{ fontSize: 32, fontWeight: 'bold', color: colors.primary[700] }}>
-          ${plan.price}
-        </Text>
-        <Text style={{ fontSize: 12, color: colors.text.secondary, marginTop: spacing.sm }}>
-          {t('payment.perMonth')}
-        </Text>
+      <Text style={styles.planName}>{plan.name}</Text>
+      
+      <View style={styles.priceContainer}>
+        <Text style={styles.currency}>$</Text>
+        <Text style={styles.priceValue}>{plan.price}</Text>
+        <Text style={styles.perMonth}>/mo</Text>
       </View>
 
-      <View style={{ marginBottom: spacing.lg }}>
+      <View style={styles.featuresList}>
         {plan.features.map((feature: string, index: number) => (
-          <View key={index} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md }}>
-            <Text style={{ fontSize: 16, marginRight: spacing.md, color: colors.status.success }}>✓</Text>
-            <Text style={{ fontSize: 14, color: colors.text.secondary, flex: 1 }}>{feature}</Text>
+          <View key={index} style={styles.featureItem}>
+            <Ionicons name="checkmark-circle" size={18} color={plan.popular ? colors.primary.neon : colors.status.success} />
+            <Text style={styles.featureText}>{feature}</Text>
           </View>
         ))}
       </View>
 
       <TouchableOpacity
         onPress={() => handleSubscribe(plan.id)}
-        style={{
-          backgroundColor: plan.popular ? colors.primary[700] : colors.neutral[200],
-          borderRadius: spacing.md,
-          paddingVertical: spacing.md,
-        }}
+        style={[
+          styles.subscribeBtn,
+          plan.popular ? styles.popularBtn : styles.standardBtn
+        ]}
       >
-        <Text
-          style={{
-            color: plan.popular ? 'white' : colors.text.primary,
-            fontSize: 16,
-            fontWeight: '600',
-            textAlign: 'center',
-          }}
-        >
+        <Text style={[
+          styles.subscribeBtnText,
+          plan.popular ? styles.popularBtnText : styles.standardBtnText
+        ]}>
           {plan.id === 'free' ? 'Current Plan' : t('payment.subscribe')}
         </Text>
       </TouchableOpacity>
@@ -135,36 +98,192 @@ export default function SubscriptionScreen({ onNavigate }: SubscriptionScreenPro
   );
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.background.secondary }}>
-      <View
-        style={{
-          paddingHorizontal: spacing.lg,
-          paddingVertical: spacing.lg,
-          backgroundColor: colors.background.primary,
-          borderBottomWidth: 1,
-          borderBottomColor: colors.neutral[200],
-        }}
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      <ScrollView 
+        style={{ flex: 1 }}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
-        <Text
-          style={{
-            fontSize: 28,
-            fontWeight: 'bold',
-            color: colors.text.primary,
-            marginBottom: spacing.sm,
-          }}
-        >
-          {t('payment.upgrade')}
-        </Text>
-        <Text style={{ fontSize: 14, color: colors.text.secondary }}>
-          Choose the perfect plan for your storytelling journey
-        </Text>
-      </View>
+        <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={() => onNavigate('Home')}
+            style={styles.backBtn}
+          >
+            <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Upgrade</Text>
+          <View style={{ width: 40 }} />
+        </View>
 
-      <View style={{ paddingVertical: spacing.lg }}>
-        {plans.map((plan) => (
-          <PlanCard key={plan.id} plan={plan} />
-        ))}
-      </View>
-    </ScrollView>
+        <View style={styles.intro}>
+          <Text style={styles.title}>Unlock Full Magic</Text>
+          <Text style={styles.subtitle}>Escolha o plano perfeito para sua jornada de criador.</Text>
+        </View>
+
+        <View style={styles.plansContainer}>
+          {plans.map((plan) => (
+            <PlanCard key={plan.id} plan={plan} />
+          ))}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background.primary,
+  },
+  scrollContent: {
+    paddingBottom: 40,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.xl,
+    paddingTop: 20,
+    paddingBottom: spacing.lg,
+  },
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: colors.background.secondary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.background.glassBorder,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: colors.text.primary,
+  },
+  intro: {
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.lg,
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: '900',
+    color: colors.text.primary,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: colors.text.tertiary,
+    textAlign: 'center',
+  },
+  plansContainer: {
+    paddingHorizontal: spacing.xl,
+    marginTop: spacing.md,
+  },
+  planCard: {
+    backgroundColor: colors.background.secondary,
+    borderRadius: 30,
+    padding: 24,
+    marginBottom: spacing.xl,
+    borderWidth: 1,
+    borderColor: colors.background.glassBorder,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 5,
+  },
+  popularCard: {
+    borderColor: colors.primary.neon + '60',
+    backgroundColor: colors.primary[700] + '15',
+    transform: [{ scale: 1.02 }],
+  },
+  popularBadge: {
+    position: 'absolute',
+    top: -12,
+    alignSelf: 'center',
+    backgroundColor: colors.primary.neon,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  popularText: {
+    color: 'black',
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 1,
+  },
+  planName: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: colors.text.primary,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
+  currency: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: colors.text.tertiary,
+    marginRight: 2,
+  },
+  priceValue: {
+    fontSize: 48,
+    fontWeight: '900',
+    color: colors.text.primary,
+  },
+  perMonth: {
+    fontSize: 16,
+    color: colors.text.tertiary,
+    marginLeft: 4,
+  },
+  featuresList: {
+    marginBottom: 32,
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  featureText: {
+    fontSize: 15,
+    color: colors.text.secondary,
+    marginLeft: 12,
+  },
+  subscribeBtn: {
+    paddingVertical: 18,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  popularBtn: {
+    backgroundColor: colors.primary.neon,
+    shadowColor: colors.primary.neon,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  standardBtn: {
+    backgroundColor: colors.background.primary,
+    borderWidth: 1,
+    borderColor: colors.background.glassBorder,
+  },
+  subscribeBtnText: {
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  popularBtnText: {
+    color: 'black',
+  },
+  standardBtnText: {
+    color: colors.text.primary,
+  },
+});

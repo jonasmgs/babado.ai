@@ -4,17 +4,18 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
   FlatList,
   ActivityIndicator,
   RefreshControl,
+  SafeAreaView,
+  StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, borderRadius } from '@/constants/colors';
+import { colors, spacing } from '@/constants/colors';
 import { getTrendingTopics, TrendingTopic } from '@/services/trends';
 
 interface TrendsScreenProps {
-  onNavigate: (screen: string) => void;
+  onNavigate: (screen: string, data?: any) => void;
 }
 
 export default function TrendsScreen({ onNavigate }: TrendsScreenProps) {
@@ -47,7 +48,7 @@ export default function TrendsScreen({ onNavigate }: TrendsScreenProps) {
   const TrendItem = ({ item }: { item: TrendingTopic }) => (
     <TouchableOpacity 
       style={styles.trendCard}
-      onPress={() => onNavigate('StoryEditor')}
+      onPress={() => onNavigate('StoryEditor', { topic: item.topic })}
     >
       <View style={styles.trendHeader}>
         <View style={styles.topicBadge}>
@@ -96,29 +97,36 @@ export default function TrendsScreen({ onNavigate }: TrendsScreenProps) {
 
       <TouchableOpacity 
         style={styles.useTopicBtn}
-        onPress={() => onNavigate('StoryEditor')}
+        onPress={() => onNavigate('StoryEditor', { topic: item.topic })}
       >
         <Text style={styles.useTopicBtnText}>Use Topic to Create Story</Text>
-        <Ionicons name="sparkles" size={16} color="white" style={{ marginLeft: 8 }} />
+        <Ionicons name="sparkles" size={16} color="black" style={{ marginLeft: 8 }} />
       </TouchableOpacity>
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" />
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => onNavigate('Home')}>
+        <TouchableOpacity 
+          onPress={() => onNavigate('Home')}
+          style={styles.backBtn}
+        >
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>📊 Global Trends</Text>
-        <TouchableOpacity onPress={onRefresh}>
-          <Ionicons name="refresh" size={24} color={colors.primary[600]} />
+        <Text style={styles.headerTitle}>Global Trends</Text>
+        <TouchableOpacity 
+          onPress={onRefresh}
+          style={styles.refreshBtn}
+        >
+          <Ionicons name="refresh" size={22} color={colors.primary.neon} />
         </TouchableOpacity>
       </View>
 
       {isLoading && !refreshing ? (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color={colors.primary[600]} />
+          <ActivityIndicator size="large" color={colors.primary.neon} />
           <Text style={styles.loaderText}>Scanning social media for trends...</Text>
         </View>
       ) : (
@@ -127,18 +135,24 @@ export default function TrendsScreen({ onNavigate }: TrendsScreenProps) {
           renderItem={TrendItem}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary[600]]} />
+            <RefreshControl 
+              refreshing={refreshing} 
+              onRefresh={onRefresh} 
+              tintColor={colors.primary.neon}
+              colors={[colors.primary.neon]} 
+            />
           }
           ListHeaderComponent={
             <View style={styles.listHeader}>
-              <Text style={styles.lastUpdated}>Last updated: Just now</Text>
-              <Text style={styles.intro}>Analysis across TikTok, Instagram, and Twitter (X) to find viral potential for your next story.</Text>
+              <Text style={styles.lastUpdated}>Status: Live Tracking</Text>
+              <Text style={styles.intro}>Análise em tempo real no TikTok, Instagram e Twitter (X) para encontrar o próximo viral.</Text>
             </View>
           }
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -151,15 +165,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
-    paddingBottom: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.neutral[200],
+    paddingHorizontal: spacing.xl,
+    paddingTop: 20,
+    paddingBottom: spacing.lg,
+  },
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: colors.background.secondary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.background.glassBorder,
+  },
+  refreshBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: '800',
     color: colors.text.primary,
   },
   loaderContainer: {
@@ -170,19 +199,24 @@ const styles = StyleSheet.create({
   },
   loaderText: {
     marginTop: spacing.md,
-    color: colors.text.secondary,
+    color: colors.text.tertiary,
     fontSize: 14,
   },
   listContent: {
-    padding: spacing.lg,
+    paddingHorizontal: spacing.xl,
+    paddingBottom: 40,
   },
   listHeader: {
-    marginBottom: spacing.lg,
+    marginBottom: spacing.xl,
+    paddingTop: 10,
   },
   lastUpdated: {
-    fontSize: 10,
-    color: colors.text.tertiary,
-    marginBottom: 4,
+    fontSize: 11,
+    fontWeight: '700',
+    color: colors.primary.neon,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 8,
   },
   intro: {
     fontSize: 14,
@@ -191,52 +225,59 @@ const styles = StyleSheet.create({
   },
   trendCard: {
     backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
+    borderRadius: 24,
+    padding: 20,
     marginBottom: spacing.lg,
     borderWidth: 1,
-    borderColor: colors.neutral[200],
+    borderColor: colors.background.glassBorder,
   },
   trendHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.sm,
+    marginBottom: 16,
   },
   topicBadge: {
-    backgroundColor: colors.primary[100],
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    borderRadius: borderRadius.sm,
+    backgroundColor: colors.primary[700] + '30',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.primary.neon + '30',
   },
   topicBadgeText: {
     fontSize: 10,
-    fontWeight: '800',
-    color: colors.primary[700],
+    fontWeight: '900',
+    color: colors.primary.neon,
   },
   growthBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'white',
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    borderRadius: borderRadius.full,
+    backgroundColor: colors.background.primary,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: colors.background.glassBorder,
   },
   growthText: {
-    fontSize: 10,
-    fontWeight: 'bold',
+    fontSize: 11,
+    fontWeight: '800',
     marginLeft: 4,
   },
   topicTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: '800',
     color: colors.text.primary,
-    marginBottom: spacing.md,
+    marginBottom: 16,
   },
   metricRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: spacing.md,
+    backgroundColor: colors.background.primary + '50',
+    paddingVertical: 12,
+    borderRadius: 16,
+    marginBottom: 20,
   },
   metric: {
     flex: 1,
@@ -244,49 +285,56 @@ const styles = StyleSheet.create({
   },
   metricLabel: {
     fontSize: 10,
+    fontWeight: '700',
     color: colors.text.tertiary,
+    textTransform: 'uppercase',
     marginBottom: 2,
+    letterSpacing: 0.5,
   },
   metricValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 14,
+    fontWeight: '800',
     color: colors.text.secondary,
     textTransform: 'capitalize',
   },
   metricDivider: {
     width: 1,
-    height: 30,
-    backgroundColor: colors.neutral[300],
+    height: 20,
+    backgroundColor: colors.background.glassBorder,
   },
   hooksContainer: {
-    backgroundColor: 'white',
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
-    marginBottom: spacing.md,
+    marginBottom: 20,
   },
   hooksLabel: {
     fontSize: 12,
-    fontWeight: 'bold',
-    color: colors.text.secondary,
-    marginBottom: spacing.xs,
+    fontWeight: '800',
+    color: colors.text.primary,
+    marginBottom: 8,
   },
   hookText: {
-    fontSize: 12,
-    color: colors.text.primary,
+    fontSize: 13,
+    color: colors.text.secondary,
+    lineHeight: 18,
     fontStyle: 'italic',
-    marginBottom: 4,
+    marginBottom: 6,
+    opacity: 0.8,
   },
   useTopicBtn: {
-    backgroundColor: colors.primary[700],
+    backgroundColor: colors.primary.neon,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.md,
+    paddingVertical: 14,
+    borderRadius: 16,
+    shadowColor: colors.primary.neon,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 5,
   },
   useTopicBtnText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: 'black',
+    fontWeight: '900',
     fontSize: 14,
   },
 });

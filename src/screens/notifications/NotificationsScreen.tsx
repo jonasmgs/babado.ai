@@ -3,9 +3,11 @@ import {
   View,
   Text,
   ScrollView,
-  FlatList,
   TouchableOpacity,
   ActivityIndicator,
+  StyleSheet,
+  SafeAreaView,
+  StatusBar,
 } from 'react-native';
 import { supabase } from '@/services/supabase';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -14,7 +16,7 @@ import { Notification } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 
 interface NotificationsScreenProps {
-  onNavigate: (screen: string) => void;
+  onNavigate: (screen: string, data?: any) => void;
 }
 
 export default function NotificationsScreen({ onNavigate }: NotificationsScreenProps) {
@@ -25,18 +27,22 @@ export default function NotificationsScreen({ onNavigate }: NotificationsScreenP
   useEffect(() => {
     if (user?.id) {
       fetchNotifications();
+    } else {
+      // Se não tem usuário, para de carregar para não travar
+      setIsLoading(false);
     }
   }, [user]);
 
   const fetchNotifications = async () => {
     setIsLoading(true);
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('notifications')
         .select('*')
         .eq('userId', user?.id)
         .order('createdAt', { ascending: false });
 
+      if (error) throw error;
       setNotifications(data || []);
     } catch (error) {
       console.error('Error fetching notifications:', error);
@@ -54,121 +60,200 @@ export default function NotificationsScreen({ onNavigate }: NotificationsScreenP
     }
   };
 
-  const getNotificationIcon = (type: string) => {
+  const getNotificationConfig = (type: string) => {
     switch (type) {
       case 'story_published':
-        return '📝';
+        return { icon: 'document-text', color: colors.primary.neon };
       case 'milestone':
-        return '🏆';
+        return { icon: 'trophy', color: '#fbbf24' };
       case 'payment':
-        return '💳';
+        return { icon: 'card', color: '#10b981' };
       default:
-        return '📢';
+        return { icon: 'notifications', color: colors.secondary[400] };
     }
   };
 
-  const NotificationItem = ({ notification }: { notification: Notification }) => (
-    <TouchableOpacity
-      onPress={() => markAsRead(notification.id)}
-      style={{
-        backgroundColor: notification.read ? colors.background.primary : colors.primary[50],
-        borderRadius: spacing.md,
-        padding: spacing.md,
-        marginBottom: spacing.md,
-        borderLeftWidth: 4,
-        borderLeftColor: notification.read ? colors.neutral[300] : colors.primary[600],
-      }}
-    >
-      <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
-        <Text style={{ fontSize: 24, marginRight: spacing.md }}>
-          {getNotificationIcon(notification.type)}
-        </Text>
-        <View style={{ flex: 1 }}>
-          <Text
-            style={{
-              fontSize: 14,
-              fontWeight: '600',
-              color: colors.text.primary,
-              marginBottom: spacing.sm,
-            }}
-          >
-            {notification.title}
-          </Text>
-          <Text style={{ fontSize: 13, color: colors.text.secondary, marginBottom: spacing.sm }}>
-            {notification.message}
-          </Text>
-          <Text style={{ fontSize: 11, color: colors.text.tertiary }}>
+  const NotificationItem = ({ notification }: { notification: Notification }) => {
+    const config = getNotificationConfig(notification.type);
+    return (
+      <TouchableOpacity
+        onPress={() => markAsRead(notification.id)}
+        style={[
+          styles.notiItem,
+          notification.read ? styles.notiRead : styles.notiUnread
+        ]}
+      >
+        <View style={[styles.iconContainer, { backgroundColor: config.color + '15' }]}>
+          <Ionicons name={config.icon as any} size={22} color={config.color} />
+        </View>
+        <View style={styles.notiContent}>
+          <Text style={styles.notiTitle}>{notification.title}</Text>
+          <Text style={styles.notiMessage}>{notification.message}</Text>
+          <Text style={styles.notiTime}>
             {new Date(notification.createdAt).toLocaleDateString()}
           </Text>
         </View>
-        {!notification.read && (
-          <View
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: 4,
-              backgroundColor: colors.primary[600],
-              marginTop: spacing.sm,
-              marginLeft: spacing.md,
-            }}
-          />
-        )}
-      </View>
-    </TouchableOpacity>
-  );
-
-  const EmptyState = () => (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: spacing.xl }}>
-      <Text style={{ fontSize: 18, color: colors.text.secondary, marginBottom: spacing.md }}>
-        No notifications yet
-      </Text>
-      <Text style={{ fontSize: 14, color: colors.text.tertiary, textAlign: 'center' }}>
-        You'll see updates about your stories and activities here
-      </Text>
-    </View>
-  );
-
-  if (isLoading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background.primary }}>
-        <ActivityIndicator size="large" color={colors.primary[700]} />
-      </View>
+        {!notification.read && <View style={styles.unreadDot} />}
+      </TouchableOpacity>
     );
-  }
+  };
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: colors.background.secondary }}
-      contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingVertical: spacing.lg }}
-    >
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.lg }}>
-        <TouchableOpacity 
-          onPress={() => onNavigate('Home')}
-          style={{ marginRight: spacing.md }}
-        >
-          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
-        </TouchableOpacity>
-        <Text
-          style={{
-            fontSize: 28,
-            fontWeight: 'bold',
-            color: colors.text.primary,
-          }}
-        >
-          🔔 Notifications
-        </Text>
-      </View>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={() => onNavigate('Home')}
+            style={styles.backBtn}
+          >
+            <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Notifications</Text>
+          <View style={{ width: 40 }} />
+        </View>
 
-      {notifications.length === 0 ? (
-        <EmptyState />
-      ) : (
-        <FlatList
-          scrollEnabled={false}
-          data={notifications}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <NotificationItem notification={item} />}
-        />
-      )}
-    </ScrollView>
+        <View style={styles.content}>
+          {isLoading ? (
+            <View style={styles.centerContainer}>
+              <ActivityIndicator size="large" color={colors.primary.neon} />
+            </View>
+          ) : notifications.length === 0 ? (
+            <View style={styles.centerContainer}>
+              <View style={styles.emptyIconCircle}>
+                <Ionicons name="notifications-off-outline" size={40} color={colors.text.tertiary} />
+              </View>
+              <Text style={styles.emptyTitle}>Silêncio por aqui...</Text>
+              <Text style={styles.emptySubtitle}>
+                Suas atualizações mágicas aparecerão aqui em breve.
+              </Text>
+            </View>
+          ) : (
+            notifications.map(item => (
+              <NotificationItem key={item.id} notification={item} />
+            ))
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background.primary,
+  },
+  scrollContent: {
+    paddingBottom: 40,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.xl,
+    paddingTop: 20,
+    paddingBottom: spacing.xl,
+  },
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: colors.background.secondary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.background.glassBorder,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: colors.text.primary,
+  },
+  content: {
+    paddingHorizontal: spacing.xl,
+  },
+  notiItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 20,
+    marginBottom: spacing.md,
+    backgroundColor: colors.background.secondary,
+    borderWidth: 1,
+    borderColor: colors.background.glassBorder,
+  },
+  notiUnread: {
+    borderColor: colors.primary.neon + '40',
+    backgroundColor: colors.primary[700] + '10',
+  },
+  notiRead: {
+    opacity: 0.8,
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  notiContent: {
+    flex: 1,
+  },
+  notiTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: colors.text.primary,
+    marginBottom: 4,
+  },
+  notiMessage: {
+    fontSize: 13,
+    color: colors.text.secondary,
+    lineHeight: 18,
+    marginBottom: 6,
+  },
+  notiTime: {
+    fontSize: 11,
+    color: colors.text.tertiary,
+  },
+  unreadDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.primary.neon,
+    marginLeft: 10,
+  },
+  centerContainer: {
+    marginTop: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: colors.background.secondary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: colors.background.glassBorder,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: colors.text.primary,
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: colors.text.tertiary,
+    textAlign: 'center',
+    paddingHorizontal: 40,
+  },
+});

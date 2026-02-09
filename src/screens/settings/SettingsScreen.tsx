@@ -5,6 +5,9 @@ import {
   ScrollView,
   TouchableOpacity,
   Switch,
+  StyleSheet,
+  SafeAreaView,
+  StatusBar,
 } from 'react-native';
 import I18n, { setLanguage } from '@/i18n';
 import { colors, spacing } from '@/constants/colors';
@@ -12,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Alert } from 'react-native';
 
 interface SettingsScreenProps {
-  onNavigate: (screen: string) => void;
+  onNavigate: (screen: string, data?: any) => void;
 }
 
 export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
@@ -38,185 +41,180 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
     hasToggle = false,
     toggleValue = false,
     onToggle,
+    color = colors.primary.neon,
   }: any) => (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: spacing.md,
-        paddingHorizontal: spacing.lg,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.neutral[200],
-      }}
+    <TouchableOpacity
+      onPress={onPress}
+      disabled={hasToggle}
+      style={styles.settingItem}
     >
-      <Text style={{ fontSize: 20, marginRight: spacing.md }}>{icon}</Text>
+      <View style={[styles.iconContainer, { backgroundColor: color + '15' }]}>
+        <Ionicons name={icon as any} size={20} color={color} />
+      </View>
       <View style={{ flex: 1 }}>
-        <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text.primary }}>
-          {label}
-        </Text>
-        {value && <Text style={{ fontSize: 12, color: colors.text.secondary, marginTop: spacing.sm }}>{value}</Text>}
+        <Text style={styles.settingLabel}>{label}</Text>
+        {value && <Text style={styles.settingValue}>{value}</Text>}
       </View>
       {hasToggle ? (
         <Switch
           value={toggleValue}
           onValueChange={onToggle}
-          trackColor={{ false: colors.neutral[300], true: colors.primary[300] }}
-          thumbColor={toggleValue ? colors.primary[700] : colors.neutral[400]}
+          trackColor={{ false: '#334155', true: colors.primary.neon + '40' }}
+          thumbColor={toggleValue ? colors.primary.neon : '#94a3b8'}
         />
       ) : (
-        onPress && <Text style={{ fontSize: 18, color: colors.text.tertiary }}>›</Text>
+        onPress && <Ionicons name="chevron-forward" size={18} color={colors.text.tertiary} />
       )}
-    </View>
+    </TouchableOpacity>
   );
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingHorizontal: spacing.lg,
-          paddingVertical: spacing.lg,
-          backgroundColor: colors.background.secondary,
-          borderBottomWidth: 1,
-          borderBottomColor: colors.neutral[200],
-        }}
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      <ScrollView 
+        style={{ flex: 1 }}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
-        <TouchableOpacity 
-          onPress={() => onNavigate('Home')}
-          style={{ marginRight: spacing.md }}
-        >
-          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
-        </TouchableOpacity>
-        <Text
-          style={{
-            fontSize: 28,
-            fontWeight: 'bold',
-            color: colors.text.primary,
-          }}
-        >
-          ⚙️ Settings
-        </Text>
-      </View>
-
-      <View style={{ paddingVertical: spacing.lg }}>
-        <Text
-          style={{
-            fontSize: 14,
-            fontWeight: '600',
-            color: colors.text.secondary,
-            paddingHorizontal: spacing.lg,
-            marginBottom: spacing.md,
-          }}
-        >
-          PREFERENCES
-        </Text>
-
-        <SettingItem
-          icon="🌍"
-          label="Language"
-          value={language === 'en' ? 'English' : 'Português'}
-          onPress={() => handleLanguageChange(language === 'en' ? 'pt' : 'en')}
-        />
-
-        <SettingItem
-          icon="🔔"
-          label="Notifications"
-          hasToggle
-          toggleValue={notificationsEnabled}
-          onToggle={setNotificationsEnabled}
-        />
-
-        <SettingItem
-          icon="🌙"
-          label="Dark Mode"
-          hasToggle
-          toggleValue={darkMode}
-          onToggle={setDarkMode}
-        />
-
-        <View style={{ paddingHorizontal: spacing.lg, paddingVertical: spacing.md }}>
-          <View
-            style={{
-              flexDirection: 'row',
-              borderRadius: spacing.md,
-              backgroundColor: colors.background.secondary,
-            }}
+        <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={() => onNavigate('Home')}
+            style={styles.backBtn}
           >
-            <TouchableOpacity
-              onPress={() => handleLanguageChange('en')}
-              style={{
-                flex: 1,
-                paddingVertical: spacing.md,
-                borderRadius: spacing.md,
-                backgroundColor: language === 'en' ? colors.primary[700] : colors.neutral[200],
-              }}
-            >
-              <Text
-                style={{
-                  textAlign: 'center',
-                  color: language === 'en' ? 'white' : colors.text.primary,
-                  fontWeight: '600',
-                }}
-              >
-                EN
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => handleLanguageChange('pt')}
-              style={{
-                flex: 1,
-                paddingVertical: spacing.md,
-                borderRadius: spacing.md,
-                backgroundColor: language === 'pt' ? colors.primary[700] : colors.neutral[200],
-                marginLeft: spacing.sm,
-              }}
-            >
-              <Text
-                style={{
-                  textAlign: 'center',
-                  color: language === 'pt' ? 'white' : colors.text.primary,
-                  fontWeight: '600',
-                }}
-              >
-                PT
-              </Text>
-            </TouchableOpacity>
-          </View>
+            <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Settings</Text>
+          <View style={{ width: 40 }} />
         </View>
 
-        <Text
-          style={{
-            fontSize: 14,
-            fontWeight: '600',
-            color: colors.text.secondary,
-            paddingHorizontal: spacing.lg,
-            marginTop: spacing.lg,
-            marginBottom: spacing.md,
-          }}
-        >
-          ABOUT
-        </Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Preferences</Text>
+          <SettingItem
+            icon="language-outline"
+            label="Language"
+            value={language === 'en' ? 'English' : 'Português'}
+            onPress={() => handleLanguageChange(language === 'en' ? 'pt' : 'en')}
+            color="#6366f1"
+          />
 
-        <SettingItem
-          icon="ℹ️"
-          label="About Babado.ai"
-          value="Version 1.0.0"
-          onPress={() => showInfo('About Babado.ai', 'The ultimate storytelling app powered by AI. Create, rewrite, and share viral stories across social media!')}
-        />
+          <SettingItem
+            icon="notifications-outline"
+            label="Notifications"
+            hasToggle
+            toggleValue={notificationsEnabled}
+            onToggle={setNotificationsEnabled}
+            color="#ec4899"
+          />
 
-        <SettingItem
-          icon="📋"
-          label="Privacy Policy"
-          onPress={() => showInfo('Privacy Policy', 'Your privacy is our priority. We only use your data to improve your storytelling experience. No information is sold to third parties.')}
-        />
+          <SettingItem
+            icon="moon-outline"
+            label="Dark Mode"
+            hasToggle
+            toggleValue={darkMode}
+            onToggle={setDarkMode}
+            color="#8b5cf6"
+          />
+        </View>
 
-        <SettingItem
-          icon="⚖️"
-          label="Terms of Service"
-          onPress={() => showInfo('Terms of Service', 'By using Babado.ai, you agree to create respectful content and follow social media platform guidelines.')}
-        />
-      </View>
-    </ScrollView>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>About</Text>
+          <SettingItem
+            icon="information-circle-outline"
+            label="About Babado.ai"
+            value="Version 1.1.0"
+            onPress={() => showInfo('About Babado.ai', 'The ultimate storytelling app powered by AI. Create, rewrite, and share viral stories across social media!')}
+            color="#64748b"
+          />
+
+          <SettingItem
+            icon="shield-checkmark-outline"
+            label="Privacy Policy"
+            onPress={() => showInfo('Privacy Policy', 'Your privacy is our priority. We only use your data to improve your storytelling experience.')}
+            color="#10b981"
+          />
+
+          <SettingItem
+            icon="document-text-outline"
+            label="Terms of Service"
+            onPress={() => showInfo('Terms of Service', 'By using Babado.ai, you agree to create respectful content and follow social media platform guidelines.')}
+            color="#f59e0b"
+          />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background.primary,
+  },
+  scrollContent: {
+    paddingBottom: 40,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.xl,
+    paddingTop: 20,
+    paddingBottom: spacing.xl,
+  },
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: colors.background.secondary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.background.glassBorder,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: colors.text.primary,
+  },
+  section: {
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.xl,
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.text.tertiary,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: spacing.md,
+    marginLeft: 4,
+  },
+  settingItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.background.secondary,
+    padding: 14,
+    borderRadius: 20,
+    marginBottom: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.background.glassBorder,
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  settingLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text.secondary,
+  },
+  settingValue: {
+    fontSize: 12,
+    color: colors.text.tertiary,
+    marginTop: 2,
+  },
+});

@@ -5,18 +5,18 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  FlatList,
   Alert,
-  Switch,
   TextInput,
   ActivityIndicator,
+  SafeAreaView,
+  StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, borderRadius } from '@/constants/colors';
-import { connectPlatform, schedulePost, SocialAccount, ScheduledPost } from '@/services/socialMedia';
+import { colors, spacing } from '@/constants/colors';
+import { connectPlatform, schedulePost, SocialAccount } from '@/services/socialMedia';
 
 interface SocialMediaScreenProps {
-  onNavigate: (screen: string) => void;
+  onNavigate: (screen: string, data?: any) => void;
   storyId?: string;
 }
 
@@ -75,16 +75,16 @@ export default function SocialMediaScreen({ onNavigate, storyId }: SocialMediaSc
 
   const AccountItem = ({ item }: { item: SocialAccount }) => (
     <View style={styles.accountCard}>
-      <View style={styles.platformIcon}>
+      <View style={[styles.platformIcon, { backgroundColor: colors.background.primary }]}>
         <Ionicons 
           name={item.platform === 'tiktok' ? "logo-tiktok" : item.platform === 'instagram' ? "logo-instagram" : "logo-youtube"} 
-          size={32} 
-          color={colors.text.primary} 
+          size={24} 
+          color={item.isConnected ? colors.primary.neon : colors.text.tertiary} 
         />
       </View>
       <View style={styles.accountInfo}>
         <Text style={styles.platformName}>{item.platform.toUpperCase()}</Text>
-        <Text style={styles.username}>{item.username}</Text>
+        <Text style={styles.usernameText}>{item.username}</Text>
       </View>
       <TouchableOpacity 
         style={[styles.connectBtn, item.isConnected && styles.connectedBtn]}
@@ -98,16 +98,24 @@ export default function SocialMediaScreen({ onNavigate, storyId }: SocialMediaSc
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => onNavigate('Home')}>
-          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>🔗 Social Media</Text>
-        <View style={{ width: 24 }} />
-      </View>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      <ScrollView 
+        style={{ flex: 1 }}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={() => onNavigate('Home')}
+            style={styles.backBtn}
+          >
+            <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Social Media</Text>
+          <View style={{ width: 40 }} />
+        </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Connected Accounts</Text>
           {accounts.map(acc => <AccountItem key={acc.id} item={acc} />)}
@@ -129,8 +137,8 @@ export default function SocialMediaScreen({ onNavigate, storyId }: SocialMediaSc
                 >
                   <Ionicons 
                     name={p === 'tiktok' ? "logo-tiktok" : p === 'instagram' ? "logo-instagram" : "logo-youtube"} 
-                    size={24} 
-                    color={selectedPlatforms.includes(p) ? 'white' : colors.text.secondary} 
+                    size={22} 
+                    color={selectedPlatforms.includes(p) ? 'black' : colors.text.tertiary} 
                   />
                   <Text style={[
                     styles.platformToggleText,
@@ -149,6 +157,7 @@ export default function SocialMediaScreen({ onNavigate, storyId }: SocialMediaSc
               value={caption}
               onChangeText={setCaption}
               placeholder="Write a catchy caption..."
+              placeholderTextColor={colors.text.tertiary}
             />
 
             <TouchableOpacity 
@@ -157,11 +166,11 @@ export default function SocialMediaScreen({ onNavigate, storyId }: SocialMediaSc
               disabled={isScheduling}
             >
               {isScheduling ? (
-                <ActivityIndicator color="white" />
+                <ActivityIndicator color="black" />
               ) : (
                 <>
-                  <Ionicons name="calendar" size={20} color="white" style={{ marginRight: 8 }} />
-                  <Text style={styles.scheduleBtnText}>Schedule Post</Text>
+                  <Ionicons name="sparkles" size={20} color="black" style={{ marginRight: 8 }} />
+                  <Text style={styles.scheduleBtnText}>Schedule with AI Magic</Text>
                 </>
               )}
             </TouchableOpacity>
@@ -169,23 +178,26 @@ export default function SocialMediaScreen({ onNavigate, storyId }: SocialMediaSc
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Performance Analytics</Text>
+          <Text style={styles.sectionTitle}>Performance Insights</Text>
           <TouchableOpacity 
             style={styles.analyticsCard}
             onPress={() => onNavigate('Analytics')}
           >
             <View style={styles.analyticsHeader}>
               <View>
-                <Text style={styles.analyticsTitle}>Total Reach</Text>
-                <Text style={styles.analyticsValue}>12,450</Text>
+                <Text style={styles.analyticsTitle}>Estimated Reach</Text>
+                <Text style={styles.analyticsValue}>12,450+</Text>
               </View>
-              <Ionicons name="trending-up" size={32} color={colors.status.success} />
+              <View style={styles.reachBadge}>
+                <Ionicons name="trending-up" size={20} color={colors.status.success} />
+                <Text style={styles.reachPercent}>+12%</Text>
+              </View>
             </View>
-            <Text style={styles.analyticsHint}>View detailed breakdown in Analytics →</Text>
+            <Text style={styles.analyticsHint}>Ver detalhes completos no painel →</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -194,171 +206,212 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background.primary,
   },
+  scrollContent: {
+    paddingBottom: 40,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
-    paddingBottom: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.neutral[200],
+    paddingHorizontal: spacing.xl,
+    paddingTop: 20,
+    paddingBottom: spacing.xl,
+  },
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: colors.background.secondary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.background.glassBorder,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 24,
+    fontWeight: '800',
     color: colors.text.primary,
-  },
-  scrollContent: {
-    padding: spacing.lg,
   },
   section: {
-    marginBottom: spacing.xl,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.xl,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: '700',
-    color: colors.text.primary,
+    color: colors.text.tertiary,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
     marginBottom: spacing.md,
+    marginLeft: 4,
   },
   accountCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.background.secondary,
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
+    padding: 16,
+    borderRadius: 20,
     marginBottom: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.background.glassBorder,
   },
   platformIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: colors.background.primary,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: spacing.md,
+    marginRight: 16,
   },
   accountInfo: {
     flex: 1,
   },
   platformName: {
-    fontSize: 12,
-    fontWeight: 'bold',
+    fontSize: 11,
+    fontWeight: '800',
     color: colors.text.tertiary,
+    marginBottom: 2,
   },
-  username: {
-    fontSize: 14,
+  usernameText: {
+    fontSize: 15,
     color: colors.text.primary,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   connectBtn: {
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.full,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: colors.primary[600],
+    borderColor: colors.primary.neon,
   },
   connectedBtn: {
-    backgroundColor: colors.primary[50],
-    borderColor: 'transparent',
+    backgroundColor: colors.primary.neon + '15',
+    borderColor: colors.primary.neon + '40',
   },
   connectBtnText: {
     fontSize: 12,
-    color: colors.primary[700],
-    fontWeight: '600',
+    color: colors.primary.neon,
+    fontWeight: '800',
   },
   connectedBtnText: {
-    color: colors.primary[400],
+    color: colors.primary.neon,
+    opacity: 0.8,
   },
   shareBox: {
     backgroundColor: colors.background.secondary,
-    padding: spacing.md,
-    borderRadius: borderRadius.lg,
+    padding: 20,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: colors.background.glassBorder,
   },
   label: {
     fontSize: 12,
-    fontWeight: 'bold',
-    color: colors.text.secondary,
-    marginBottom: spacing.sm,
+    fontWeight: '700',
+    color: colors.text.tertiary,
+    textTransform: 'uppercase',
+    marginBottom: 12,
   },
   platformToggleRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: spacing.lg,
+    marginBottom: 24,
   },
   platformToggle: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.md,
+    paddingVertical: 12,
+    borderRadius: 16,
     backgroundColor: colors.background.primary,
     marginHorizontal: 4,
     borderWidth: 1,
-    borderColor: colors.neutral[300],
+    borderColor: colors.background.glassBorder,
   },
   selectedPlatformToggle: {
-    backgroundColor: colors.primary[600],
-    borderColor: colors.primary[600],
+    backgroundColor: colors.primary.neon,
+    borderColor: colors.primary.neon,
   },
   platformToggleText: {
     fontSize: 10,
-    marginTop: 4,
-    color: colors.text.secondary,
+    marginTop: 6,
+    fontWeight: '700',
+    color: colors.text.tertiary,
   },
   selectedPlatformToggleText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: 'black',
   },
   captionInput: {
     backgroundColor: colors.background.primary,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    height: 80,
+    color: colors.text.primary,
+    borderRadius: 16,
+    padding: 16,
+    height: 100,
     textAlignVertical: 'top',
-    marginBottom: spacing.lg,
+    marginBottom: 24,
     fontSize: 14,
+    borderWidth: 1,
+    borderColor: colors.background.glassBorder,
   },
   scheduleBtn: {
-    backgroundColor: colors.primary[700],
+    backgroundColor: colors.primary.neon,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.md,
+    paddingVertical: 16,
+    borderRadius: 16,
+    shadowColor: colors.primary.neon,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
   },
   disabledBtn: {
     opacity: 0.6,
   },
   scheduleBtnText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
+    color: 'black',
+    fontWeight: '900',
+    fontSize: 15,
   },
   analyticsCard: {
     backgroundColor: colors.background.secondary,
-    padding: spacing.lg,
-    borderRadius: borderRadius.lg,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.status.success,
+    padding: 20,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: colors.background.glassBorder,
   },
   analyticsHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.md,
+    marginBottom: 12,
   },
   analyticsTitle: {
-    fontSize: 14,
-    color: colors.text.secondary,
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.text.tertiary,
   },
   analyticsValue: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: '900',
     color: colors.text.primary,
+  },
+  reachBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.status.success + '15',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  reachPercent: {
+    color: colors.status.success,
+    fontSize: 12,
+    fontWeight: '800',
+    marginLeft: 4,
   },
   analyticsHint: {
     fontSize: 12,
-    color: colors.primary[700],
-    fontWeight: '600',
+    color: colors.primary.neon,
+    fontWeight: '700',
   },
 });
