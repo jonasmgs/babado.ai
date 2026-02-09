@@ -10,9 +10,13 @@ Notifications.setNotificationHandler({
   }),
 });
 
+import { Platform } from 'react-native';
+
 export function useNotifications() {
   useEffect(() => {
-    registerForPushNotifications();
+    if (Platform.OS !== 'web') {
+      registerForPushNotifications();
+    }
   }, []);
 
   const registerForPushNotifications = async () => {

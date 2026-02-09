@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Dimensions,
   Image,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -45,7 +46,9 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
   const handleNext = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
     if (currentSlideIndex < SLIDES.length - 1) {
       setCurrentSlideIndex(currentSlideIndex + 1);
     } else {

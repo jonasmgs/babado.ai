@@ -1,6 +1,7 @@
-import { Audio } from 'expo-av';
-import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import { Audio } from 'expo-av';
+import { Platform } from 'react-native';
 
 export class AudioPlayer {
   private sound: Audio.Sound | null = null;
@@ -10,6 +11,10 @@ export class AudioPlayer {
    * Load audio file
    */
   async load(uri: string): Promise<void> {
+    if (Platform.OS === 'web') {
+      console.log('Audio loading skipped on web');
+      return;
+    }
     try {
       // Unload previous sound if exists
       if (this.sound) {
@@ -173,7 +178,14 @@ export async function shareAudio(uri: string): Promise<void> {
  */
 export async function downloadAudio(uri: string, fileName: string): Promise<string> {
   try {
-    const downloadUri = `${FileSystem.documentDirectory}${fileName}`;
+    const docDir = FileSystem.documentDirectory || '';
+    const downloadUri = `${docDir}${fileName}`;
+
+    if (Platform.OS === 'web') {
+      console.log('Audio download skipped on web:', uri);
+      return uri;
+    }
+
     const downloadResult = await FileSystem.downloadAsync(uri, downloadUri);
 
     if (downloadResult.status !== 200) {

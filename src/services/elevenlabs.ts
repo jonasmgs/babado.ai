@@ -1,6 +1,9 @@
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
 import { supabase } from './supabase';
+import { Platform } from 'react-native';
+
+const documentDirectory = FileSystem.documentDirectory || '';
 
 const ELEVENLABS_API_KEY = process.env.EXPO_PUBLIC_ELEVENLABS_API_KEY || '';
 const ELEVENLABS_API_URL = 'https://api.elevenlabs.io/v1';
@@ -73,7 +76,12 @@ export async function generateSpeech(
 
     // Save to local file system
     const filename = `voice_${Date.now()}.mp3`;
-    const fileUri = `${FileSystem.documentDirectory}${filename}`;
+    const fileUri = `${documentDirectory}${filename}`;
+
+    if (Platform.OS === 'web') {
+      console.log('Audio generation simulated on web:', text);
+      return 'https://example.com/dummy.mp3';
+    }
 
     await FileSystem.writeAsStringAsync(
       fileUri,

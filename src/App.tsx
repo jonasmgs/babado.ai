@@ -1,5 +1,6 @@
+import 'react-native-gesture-handler';
 import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, Platform, Text, TouchableOpacity } from 'react-native';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useNotifications } from '@/hooks/useNotifications';
 import { supabase } from '@/services/supabase';
@@ -28,38 +29,70 @@ export default function App() {
   const { user, fetchUser } = useAuthStore();
 
   useEffect(() => {
+    // Add a safety timeout to prevent hanging initialization on web
+    const timer = setTimeout(() => {
+      if (isInitializing) {
+        console.warn('Initialization timed out, defaulting to Login');
+        setIsInitializing(false);
+        setCurrentScreen('Login');
+      }
+    }, 5000);
+
     checkAuth();
+    return () => clearTimeout(timer);
   }, []);
 
   const checkAuth = async () => {
+    console.log('[DEBUG] Starting checkAuth...');
     try {
       const {
         data: { session },
       } = await supabase.auth.getSession();
+      console.log('[DEBUG] Session retrieved:', !!session);
 
       if (session) {
         await fetchUser();
+        console.log('[DEBUG] User fetched, navigating to Home');
         setCurrentScreen('Home');
       } else {
-        // Only show onboarding if not logged in
+        console.log('[DEBUG] No session, navigating to Onboarding');
         setCurrentScreen('Onboarding');
       }
     } catch (error) {
-      console.error('Auth check error:', error);
+      console.error('[DEBUG] Auth check error:', error);
       setCurrentScreen('Login');
     } finally {
+      console.log('[DEBUG] checkAuth finished, setting isInitializing to false');
       setIsInitializing(false);
     }
   };
 
   const handleNavigate = (screen: Screen) => {
+    console.log('[DEBUG] Navigating to:', screen);
     setCurrentScreen(screen);
   };
 
   if (isInitializing) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background.primary }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background.primary, padding: 20 }}>
         <ActivityIndicator size="large" color={colors.primary[700]} />
+        {Platform.OS === 'web' && (
+          <>
+            <Text style={{ marginTop: 20, color: colors.text.secondary }}>
+              Initializing Babado.ai...
+            </Text>
+            <TouchableOpacity 
+              onPress={() => {
+                console.warn('Manual override triggered');
+                setIsInitializing(false);
+                setCurrentScreen('Onboarding');
+              }}
+              style={{ marginTop: 40, padding: 10, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 8 }}
+            >
+              <Text style={{ color: colors.primary[500] }}>Bypass Initialization (Debug)</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
     );
   }

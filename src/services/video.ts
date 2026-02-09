@@ -1,6 +1,10 @@
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { supabase } from './supabase';
+import { Platform } from 'react-native';
+
+const documentDirectory = FileSystem.documentDirectory || '';
+const EncodingType = FileSystem.EncodingType;
 
 export interface VideoExportOptions {
   storyId: string;
