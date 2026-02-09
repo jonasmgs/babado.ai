@@ -11,6 +11,7 @@ import {
   StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from '@/hooks/useTranslation';
 import { colors, spacing } from '@/constants/colors';
 import { getTrendingTopics, TrendingTopic } from '@/services/trends';
 
@@ -22,6 +23,7 @@ export default function TrendsScreen({ onNavigate }: TrendsScreenProps) {
   const [trends, setTrends] = useState<TrendingTopic[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const { t, language } = useTranslation();
 
   useEffect(() => {
     loadTrends();
@@ -73,23 +75,23 @@ export default function TrendsScreen({ onNavigate }: TrendsScreenProps) {
       
       <View style={styles.metricRow}>
         <View style={styles.metric}>
-          <Text style={styles.metricLabel}>Score</Text>
+          <Text style={styles.metricLabel}>{language === 'pt' ? 'Pontos' : 'Score'}</Text>
           <Text style={styles.metricValue}>{item.popularityScore}</Text>
         </View>
         <View style={styles.metricDivider} />
         <View style={styles.metric}>
-          <Text style={styles.metricLabel}>Sentiment</Text>
+          <Text style={styles.metricLabel}>{language === 'pt' ? 'Sentimento' : 'Sentiment'}</Text>
           <Text style={[
             styles.metricValue,
             { color: item.sentiment === 'positive' ? colors.status.success : item.sentiment === 'negative' ? colors.status.error : colors.text.secondary }
           ]}>
-            {item.sentiment}
+             {language === 'pt' ? (item.sentiment === 'positive' ? 'Positivo' : item.sentiment === 'negative' ? 'Negativo' : 'Neutro') : item.sentiment}
           </Text>
         </View>
       </View>
 
       <View style={styles.hooksContainer}>
-        <Text style={styles.hooksLabel}>Suggest Hooks:</Text>
+        <Text style={styles.hooksLabel}>{t('story.hooks')}:</Text>
         {item.suggestedHooks.map((hook, index) => (
           <Text key={index} style={styles.hookText}>• "{hook}"</Text>
         ))}
@@ -99,7 +101,7 @@ export default function TrendsScreen({ onNavigate }: TrendsScreenProps) {
         style={styles.useTopicBtn}
         onPress={() => onNavigate('StoryEditor', { topic: item.topic })}
       >
-        <Text style={styles.useTopicBtnText}>Use Topic to Create Story</Text>
+        <Text style={styles.useTopicBtnText}>{language === 'pt' ? 'Usar Tópico para Criar História' : 'Use Topic to Create Story'}</Text>
         <Ionicons name="sparkles" size={16} color="black" style={{ marginLeft: 8 }} />
       </TouchableOpacity>
     </TouchableOpacity>
@@ -115,24 +117,24 @@ export default function TrendsScreen({ onNavigate }: TrendsScreenProps) {
         >
           <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Global Trends</Text>
+        <Text style={styles.headerTitle}>{t('home.trending')}</Text>
         <TouchableOpacity 
           onPress={onRefresh}
           style={styles.refreshBtn}
         >
-          <Ionicons name="refresh" size={22} color={colors.primary.neon} />
+          <Ionicons name="refresh" size={22} color="#25F4EE" />
         </TouchableOpacity>
       </View>
 
       {isLoading && !refreshing ? (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color={colors.primary.neon} />
-          <Text style={styles.loaderText}>Scanning social media for trends...</Text>
+          <ActivityIndicator size="large" color="#25F4EE" />
+          <Text style={styles.loaderText}>{language === 'pt' ? 'Escaneando tendências nas redes sociais...' : 'Scanning social media for trends...'}</Text>
         </View>
       ) : (
         <FlatList
           data={trends}
-          renderItem={TrendItem}
+          renderItem={({ item }) => <TrendItem item={item} />}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
@@ -140,14 +142,14 @@ export default function TrendsScreen({ onNavigate }: TrendsScreenProps) {
             <RefreshControl 
               refreshing={refreshing} 
               onRefresh={onRefresh} 
-              tintColor={colors.primary.neon}
-              colors={[colors.primary.neon]} 
+              tintColor="#25F4EE"
+              colors={["#25F4EE"]} 
             />
           }
           ListHeaderComponent={
             <View style={styles.listHeader}>
               <Text style={styles.lastUpdated}>Status: Live Tracking</Text>
-              <Text style={styles.intro}>Análise em tempo real no TikTok, Instagram e Twitter (X) para encontrar o próximo viral.</Text>
+              <Text style={styles.intro}>{language === 'pt' ? 'Análise em tempo real no TikTok, Instagram e Twitter (X) para encontrar o próximo viral.' : 'Real-time analysis on TikTok, Instagram, and Twitter (X) to find the next viral hit.'}</Text>
             </View>
           }
         />
@@ -213,7 +215,7 @@ const styles = StyleSheet.create({
   lastUpdated: {
     fontSize: 11,
     fontWeight: '700',
-    color: colors.primary.neon,
+    color: "#25F4EE",
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: 8,
@@ -238,17 +240,17 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   topicBadge: {
-    backgroundColor: colors.primary[700] + '30',
+    backgroundColor: 'rgba(37, 244, 238, 0.1)',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: colors.primary.neon + '30',
+    borderColor: 'rgba(37, 244, 238, 0.3)',
   },
   topicBadgeText: {
     fontSize: 10,
     fontWeight: '900',
-    color: colors.primary.neon,
+    color: "#25F4EE",
   },
   growthBadge: {
     flexDirection: 'row',
@@ -320,13 +322,13 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   useTopicBtn: {
-    backgroundColor: colors.primary.neon,
+    backgroundColor: "#25F4EE",
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 14,
     borderRadius: 16,
-    shadowColor: colors.primary.neon,
+    shadowColor: "#25F4EE",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 10,

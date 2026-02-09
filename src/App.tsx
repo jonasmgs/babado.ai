@@ -59,19 +59,25 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
   }
 }
 
+import { useSettingsStore } from '@/store/useSettingsStore';
+import i18n from '@/i18n';
+
 function AppContent() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('Onboarding');
   const [isInitializing, setIsInitializing] = useState(true);
   const [navigationData, setNavigationData] = useState<any>({});
   const { user, fetchUser } = useAuthStore();
+  const { language } = useSettingsStore();
 
   useEffect(() => {
+    // Sincroniza i18n locale na inicialização do App
+    i18n.locale = language;
+    
     let mounted = true;
 
     async function initializeAuth() {
       console.log('[Auth] Starting initialization...');
       
-      // Safety timeout - hide loader after 5 seconds no matter what
       const timer = setTimeout(() => {
         if (mounted) {
           console.warn('[Auth] Initialization timeout reached');
@@ -80,7 +86,6 @@ function AppContent() {
       }, 5000);
 
       try {
-        // 1. Check current session explicitly
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) throw sessionError;
@@ -103,7 +108,6 @@ function AppContent() {
         }
       }
 
-      // 2. Set up listener for future changes
       const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
         console.log(`[Auth] Event Change: ${event}`, session?.user?.id);
         if (event === 'SIGNED_IN' && session) {
@@ -123,16 +127,18 @@ function AppContent() {
       mounted = false;
       authPromise.then(sub => sub?.unsubscribe());
     };
-  }, [fetchUser]);
+  }, [fetchUser, language]);
 
   // Hook for notifications
   useNotifications();
 
   if (isInitializing) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background.primary }}>
-        <ActivityIndicator size="large" color={colors.primary[700]} />
-        <Text style={{ marginTop: 20, color: colors.text.secondary }}>Carregando Babado.ai...</Text>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#010101' }}>
+        <ActivityIndicator size="large" color="#25F4EE" />
+        <Text style={{ marginTop: 20, color: 'white', fontWeight: 'bold' }}>
+          {language === 'pt' ? 'Carregando Babado.ai...' : 'Loading Babado.ai...'}
+        </Text>
       </View>
     );
   }

@@ -4,31 +4,31 @@ export const colors = {
     100: '#ede9fe',
     200: '#ddd6fe',
     300: '#c4b5fd',
-    400: '#a78bfa',
-    500: '#8b5cf6',
-    600: '#7c3aed',
-    700: '#6d28d9',
-    800: '#5b21b6',
-    900: '#4c1d95',
-    neon: '#a78bfa',
+    400: '#25F4EE', // TikTok Cyan
+    500: '#25F4EE',
+    600: '#25F4EE',
+    700: '#25F4EE',
+    800: '#1aaca7',
+    900: '#0f625f',
+    neon: '#25F4EE', // TikTok Cyan
   },
   secondary: {
-    50: '#ecfeff',
-    100: '#cffafe',
-    200: '#a5f3fc',
-    300: '#67e8f9',
-    400: '#22d3ee',
-    500: '#06b6d4',
-    600: '#0891b2',
-    700: '#0e7490',
-    800: '#155e75',
-    900: '#164e63',
+    50: '#fff1f2',
+    100: '#ffe4e6',
+    200: '#fecdd3',
+    300: '#fda4af',
+    400: '#fb7185',
+    500: '#FE2C55', // TikTok Red/Pink
+    600: '#e11d48',
+    700: '#be123c',
+    800: '#9f1239',
+    900: '#881337',
   },
   accent: {
-    pink: '#f472b6',
+    pink: '#FE2C55', // TikTok Red
     purple: '#a78bfa',
-    cyan: '#22d3ee',
-    gradient: ['#7c3aed', '#22d3ee'],
+    cyan: '#25F4EE', // TikTok Cyan
+    gradient: ['#FE2C55', '#25F4EE'], // TikTok Gradient
   },
   neutral: {
     50: '#f8fafc',
@@ -51,17 +51,17 @@ export const colors = {
   },
   text: {
     primary: '#f8fafc',
-    secondary: '#94a3b8',
-    tertiary: '#64748b',
-    inverse: '#0f172a',
-    accent: '#a78bfa',
+    secondary: '#e2e8f0',
+    tertiary: '#94a3b8',
+    inverse: '#010101', // TikTok Black
+    accent: '#25F4EE', // TikTok Cyan
   },
   background: {
-    primary: '#020617', // Deep Slate/Black
-    secondary: '#0f172a',
-    tertiary: '#1e293b',
-    glass: 'rgba(30, 41, 59, 0.7)',
-    glassBorder: 'rgba(148, 163, 184, 0.1)',
+    primary: '#010101', // Pure Black for TikTok feel
+    secondary: '#121212',
+    tertiary: '#1e1e1e',
+    glass: 'rgba(255, 255, 255, 0.08)',
+    glassBorder: 'rgba(255, 255, 255, 0.12)',
   },
 };
 

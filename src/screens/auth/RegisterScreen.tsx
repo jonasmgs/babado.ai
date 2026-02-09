@@ -11,7 +11,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useAuthStore } from '@/store/useAuthStore';
-import { t } from '@/i18n';
+import { useTranslation } from '@/hooks/useTranslation';
 import { colors, spacing } from '@/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -25,11 +25,12 @@ export default function RegisterScreen({ onNavigate }: RegisterScreenProps) {
   const [username, setUsername] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const { register, isLoading, error, clearError } = useAuthStore();
+  const { t, language } = useTranslation();
 
   const handleRegister = async () => {
     clearError();
     if (password !== confirmPassword) {
-      alert('Passwords do not match');
+      alert(language === 'pt' ? 'As senhas não coincidem' : 'Passwords do not match');
       return;
     }
     await register(email, password, username);
@@ -55,8 +56,8 @@ export default function RegisterScreen({ onNavigate }: RegisterScreenProps) {
           </TouchableOpacity>
 
           <View style={styles.header}>
-            <Text style={styles.title}>Create Account</Text>
-            <Text style={styles.subtitle}>Join thousands of creators today</Text>
+            <Text style={styles.title}>{language === 'pt' ? 'Criar Conta' : 'Create Account'}</Text>
+            <Text style={styles.subtitle}>{language === 'pt' ? 'Junte-se a milhares de criadores hoje' : 'Join thousands of creators today'}</Text>
           </View>
 
           {error && (
@@ -117,7 +118,7 @@ export default function RegisterScreen({ onNavigate }: RegisterScreenProps) {
             </View>
 
             <View style={[styles.inputWrapper, { marginBottom: spacing.xl }]}>
-              <Text style={styles.label}>Confirm Password</Text>
+              <Text style={styles.label}>{language === 'pt' ? 'Confirmar Senha' : 'Confirm Password'}</Text>
               <View style={styles.inputContainer}>
                 <Ionicons name="shield-checkmark-outline" size={20} color={colors.text.tertiary} style={styles.inputIcon} />
                 <TextInput
@@ -148,9 +149,9 @@ export default function RegisterScreen({ onNavigate }: RegisterScreenProps) {
             </TouchableOpacity>
 
             <View style={styles.loginLink}>
-              <Text style={styles.loginText}>Already have an account? </Text>
+              <Text style={styles.loginText}>{language === 'pt' ? 'Já tem uma conta?' : 'Already have an account?'} </Text>
               <TouchableOpacity onPress={() => onNavigate('Login')}>
-                <Text style={styles.loginAction}>Sign In</Text>
+                <Text style={styles.loginAction}>{language === 'pt' ? 'Entrar' : 'Sign In'}</Text>
               </TouchableOpacity>
             </View>
           </View>

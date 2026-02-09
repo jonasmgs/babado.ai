@@ -1,21 +1,23 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
-  ScrollView,
   FlatList,
-  Image,
   ActivityIndicator,
   StyleSheet,
   StatusBar,
   SafeAreaView,
+  Dimensions,
+  Animated,
 } from 'react-native';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useStoryStore } from '@/store/useStoryStore';
-import { t } from '@/i18n';
+import { useTranslation } from '@/hooks/useTranslation';
 import { colors, spacing } from '@/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
+
+const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface HomeScreenProps {
   onNavigate: (screen: string, data?: any) => void;
@@ -24,6 +26,9 @@ interface HomeScreenProps {
 export default function HomeScreen({ onNavigate }: HomeScreenProps) {
   const { user } = useAuthStore();
   const { stories, isLoading, fetchStories } = useStoryStore();
+  const { t } = useTranslation();
+  
+  const scrollY = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (user?.id) {
@@ -35,112 +40,113 @@ export default function HomeScreen({ onNavigate }: HomeScreenProps) {
     onNavigate('StoryEditor');
   };
 
-  const getViralColor = (score: number) => {
-    if (score > 80) return colors.accent.pink;
-    if (score > 50) return colors.primary.neon;
-    return colors.secondary[400];
-  };
+  const VerticalStoryCard = ({ story, index }: any) => {
+    const viralColor = story.viralScore > 80 ? '#FE2C55' : story.viralScore > 50 ? '#25F4EE' : '#ffffff';
 
-  const StoryCard = ({ story }: any) => {
-    const viralColor = getViralColor(story.viralScore || 0);
-    
     return (
-      <TouchableOpacity
-        onPress={() => onNavigate('StoryDetail', { storyId: story.id })}
-        style={styles.card}
-      >
-        <View style={styles.cardHeader}>
-          <Text style={styles.cardTitle}>{story.title}</Text>
-          <View style={[styles.badge, { backgroundColor: viralColor + '20', borderColor: viralColor }]}>
-            <Ionicons name="trending-up" size={12} color={viralColor} />
-            <Text style={[styles.badgeText, { color: viralColor }]}>
-              {Math.round(story.viralScore || 0)}%
-            </Text>
-          </View>
-        </View>
-
-        <Text numberOfLines={2} style={styles.cardContent}>
-          {story.originalContent}
-        </Text>
-
-        <View style={styles.cardFooter}>
-          <View style={styles.tagContainer}>
-            <Ionicons name="pricetag-outline" size={12} color={colors.text.tertiary} />
-            <Text style={styles.tagText}>{story.category || 'General'}</Text>
-          </View>
+      <View style={[styles.fullScreenCard, { height: SCREEN_HEIGHT - 60 }]}>
+        {/* Background Gradient Simulator (Using color opacity) */}
+        <View style={[styles.backgroundOverlay, { backgroundColor: index % 2 === 0 ? '#121212' : '#010101' }]} />
+        
+        {/* Content Container */}
+        <View style={styles.contentOverlay}>
           
-          <View style={styles.actionRow}>
-            <TouchableOpacity
-              onPress={() => onNavigate('Voice', { storyId: story.id, storyContent: story.originalContent })}
-              style={styles.iconBtn}
-            >
-              <Ionicons name="mic-outline" size={20} color={colors.primary.neon} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => onNavigate('VideoEditor', { storyId: story.id, storyContent: story.originalContent })}
-              style={styles.iconBtn}
-            >
-              <Ionicons name="videocam-outline" size={20} color={colors.secondary[400]} />
-            </TouchableOpacity>
+          {/* Bottom Info Section */}
+          <View style={styles.infoSection}>
+            <Text style={styles.authorName}>@{user?.username || 'Creator'}</Text>
+            <Text style={styles.storyTitle} numberOfLines={2}>{story.title}</Text>
+            <View style={styles.tagRow}>
+              <View style={styles.categoryBadge}>
+                <Text style={styles.categoryText}>{story.category === 'real' ? t('story.real') : t('story.fictional')}</Text>
+              </View>
+              <View style={styles.viralBadge}>
+                <Ionicons name="flame" size={14} color={viralColor} />
+                <Text style={[styles.viralText, { color: viralColor }]}>{Math.round(story.viralScore || 0)}% Viral</Text>
+              </View>
+            </View>
+            <Text style={styles.storyPreview} numberOfLines={3}>{story.originalContent}</Text>
           </View>
+
+          {/* Right Action Bar */}
+          <View style={styles.rightBar}>
+            <TouchableOpacity style={styles.actionCircle} onPress={() => onNavigate('Profile')}>
+               <Ionicons name="person-circle" size={45} color="white" />
+               <View style={styles.plusOverlay}>
+                 <Ionicons name="add" size={12} color="white" />
+               </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.actionBtn}
+              onPress={() => onNavigate('Voice', { storyId: story.id, storyContent: story.originalContent })}
+            >
+              <View style={styles.iconContainer}>
+                <Ionicons name="mic" size={28} color="white" />
+              </View>
+              <Text style={styles.actionText}>Audio</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.actionBtn}
+              onPress={() => onNavigate('VideoEditor', { storyId: story.id, storyContent: story.originalContent })}
+            >
+              <View style={styles.iconContainer}>
+                <Ionicons name="videocam" size={28} color="#FE2C55" />
+              </View>
+              <Text style={styles.actionText}>Video</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.actionBtn}
+              onPress={() => onNavigate('Analytics', { storyId: story.id })}
+            >
+              <View style={styles.iconContainer}>
+                <Ionicons name="stats-chart" size={24} color="#25F4EE" />
+              </View>
+              <Text style={styles.actionText}>Stats</Text>
+            </TouchableOpacity>
+
+            <Animated.View style={styles.musicDisk}>
+              <Ionicons name="musical-notes" size={20} color="white" />
+            </Animated.View>
+          </View>
+
         </View>
-      </TouchableOpacity>
+      </View>
     );
   };
 
   const EmptyState = () => (
     <View style={styles.emptyContainer}>
-      <View style={styles.emptyIconCircle}>
-        <Ionicons name="document-text-outline" size={48} color={colors.text.tertiary} />
-      </View>
-      <Text style={styles.emptyTitle}>No stories yet</Text>
-      <Text style={styles.emptySubtitle}>
-        Your creative journey starts here. Create your first story and let AI do the magic!
-      </Text>
-      <TouchableOpacity style={styles.createBtnLarge} onPress={handleCreateStory}>
-        <Text style={styles.createBtnTextLarge}>Start Creating</Text>
-        <Ionicons name="add" size={24} color="white" />
+      <Ionicons name="duplicate-outline" size={80} color={colors.text.tertiary} />
+      <Text style={styles.emptyTitle}>Feed Empty</Text>
+      <Text style={styles.emptySubtitle}>{t('home.title')}</Text>
+      <TouchableOpacity style={styles.createBtnTikTok} onPress={handleCreateStory}>
+        <Text style={styles.createBtnTextTikTok}>{t('home.createStory')}</Text>
       </TouchableOpacity>
     </View>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" />
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
       
-      {/* Dynamic Header */}
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.welcomeText}>Hello, {user?.username || 'Creator'}</Text>
-          <Text style={styles.headerSubtitle}>Design your next viral babado</Text>
-        </View>
-        <TouchableOpacity 
-          onPress={() => onNavigate('Profile')}
-          style={styles.profileAvatar}
-        >
-          <Ionicons name="person-circle-outline" size={32} color={colors.text.primary} />
+      {/* Top Tabs Simulator */}
+      <SafeAreaView style={styles.topTabs}>
+        <TouchableOpacity>
+          <Text style={styles.tabText}>Following</Text>
         </TouchableOpacity>
-      </View>
-
-      {/* Floating Action Header */}
-      <View style={styles.actionHeader}>
-        <TouchableOpacity
-          onPress={handleCreateStory}
-          style={styles.createBtn}
-        >
-          <Ionicons name="sparkles" size={18} color="white" style={{ marginRight: 8 }} />
-          <Text style={styles.createBtnText}>New Story</Text>
+        <View style={styles.tabSeparator} />
+        <TouchableOpacity>
+          <Text style={[styles.tabText, styles.activeTabText]}>For You</Text>
+          <View style={styles.activeTabIndicator} />
         </TouchableOpacity>
-        
-        <View style={styles.statsOverview}>
-          <Ionicons name="flame" size={16} color={colors.accent.pink} />
-          <Text style={styles.statsText}>{stories.length} Stories</Text>
-        </View>
-      </View>
+      </SafeAreaView>
 
+      {/* Vertical Feed */}
       {isLoading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary.neon} />
+          <ActivityIndicator size="large" color="#25F4EE" />
         </View>
       ) : stories.length === 0 ? (
         <EmptyState />
@@ -148,167 +154,259 @@ export default function HomeScreen({ onNavigate }: HomeScreenProps) {
         <FlatList
           data={stories}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <StoryCard story={item} />}
-          contentContainerStyle={styles.listContent}
+          renderItem={({ item, index }) => <VerticalStoryCard story={item} index={index} />}
+          pagingEnabled
           showsVerticalScrollIndicator={false}
+          snapToInterval={SCREEN_HEIGHT - 60}
+          snapToAlignment="start"
+          decelerationRate="fast"
         />
       )}
-    </SafeAreaView>
+
+      {/* Bottom Nav Bar Simulator */}
+      <View style={styles.bottomNav}>
+        <TouchableOpacity style={styles.navItem} onPress={() => onNavigate('Home')}>
+          <Ionicons name="home" size={24} color="white" />
+          <Text style={styles.navText}>Home</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => onNavigate('Trends')}>
+          <Ionicons name="search" size={24} color="#94a3b8" />
+          <Text style={[styles.navText, { color: '#94a3b8' }]}>Trends</Text>
+        </TouchableOpacity>
+        
+        {/* Central Plus Button */}
+        <TouchableOpacity style={styles.createMainBtn} onPress={handleCreateStory}>
+          <View style={styles.plusIconBg}>
+            <Ionicons name="add" size={28} color="black" />
+          </View>
+          <View style={styles.plusLeftCyan} />
+          <View style={styles.plusRightRed} />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.navItem} onPress={() => onNavigate('Notifications')}>
+          <Ionicons name="chatbubble-ellipses" size={24} color="#94a3b8" />
+          <Text style={[styles.navText, { color: '#94a3b8' }]}>Inbox</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem} onPress={() => onNavigate('Profile')}>
+          <Ionicons name="person" size={24} color="#94a3b8" />
+          <Text style={[styles.navText, { color: '#94a3b8' }]}>Profile</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.primary,
+    backgroundColor: 'black',
   },
-  header: {
-    paddingHorizontal: spacing.xl,
-    paddingTop: spacing.xl,
-    paddingBottom: spacing.lg,
+  topTabs: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  welcomeText: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: colors.text.primary,
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: colors.text.secondary,
-    marginTop: 2,
-  },
-  profileAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.background.tertiary,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.background.glassBorder,
+    paddingTop: 40,
   },
-  actionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.xl,
-    marginBottom: spacing.lg,
+  tabText: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 16,
+    fontWeight: '700',
+    marginHorizontal: 15,
   },
-  createBtn: {
-    flexDirection: 'row',
-    backgroundColor: colors.primary[600],
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    shadowColor: colors.primary[600],
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  createBtnText: {
+  activeTabText: {
     color: 'white',
-    fontWeight: '700',
-    fontSize: 14,
   },
-  statsOverview: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.background.secondary,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.background.glassBorder,
+  tabSeparator: {
+    width: 1,
+    height: 12,
+    backgroundColor: 'rgba(255,255,255,0.2)',
   },
-  statsText: {
-    color: colors.text.secondary,
-    fontSize: 13,
-    fontWeight: '600',
-    marginLeft: 6,
+  activeTabIndicator: {
+    position: 'absolute',
+    bottom: -8,
+    left: '50%',
+    marginLeft: -10,
+    width: 20,
+    height: 2,
+    backgroundColor: 'white',
   },
-  listContent: {
-    paddingHorizontal: spacing.xl,
-    paddingBottom: 100,
+  fullScreenCard: {
+    width: SCREEN_WIDTH,
   },
-  card: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: 20,
-    padding: spacing.lg,
-    marginBottom: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.background.glassBorder,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+  backgroundOverlay: {
+    ...StyleSheet.absoluteFillObject,
   },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: spacing.md,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.text.primary,
+  contentOverlay: {
     flex: 1,
-    marginRight: spacing.md,
+    justifyContent: 'flex-end',
+    paddingBottom: 20,
   },
-  badge: {
+  infoSection: {
+    paddingHorizontal: 15,
+    paddingRight: 80,
+    marginBottom: 20,
+  },
+  authorName: {
+    color: 'white',
+    fontSize: 17,
+    fontWeight: '900',
+    marginBottom: 8,
+  },
+  storyTitle: {
+    color: 'white',
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 10,
+    opacity: 0.9,
+  },
+  tagRow: {
+    flexDirection: 'row',
+    marginBottom: 10,
+  },
+  categoryBadge: {
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+    marginRight: 8,
+  },
+  categoryText: {
+    color: 'white',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  viralBadge: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    borderWidth: 1,
+    paddingVertical: 3,
+    borderRadius: 4,
   },
-  badgeText: {
+  viralText: {
     fontSize: 11,
     fontWeight: '800',
     marginLeft: 4,
   },
-  cardContent: {
-    fontSize: 14,
-    color: colors.text.secondary,
-    lineHeight: 20,
-    marginBottom: spacing.lg,
+  storyPreview: {
+    color: 'white',
+    fontSize: 13,
+    lineHeight: 18,
+    opacity: 0.7,
   },
-  cardFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: colors.background.glassBorder,
-    paddingTop: spacing.md,
-  },
-  tagContainer: {
-    flexDirection: 'row',
+  rightBar: {
+    position: 'absolute',
+    right: 10,
+    bottom: 40,
     alignItems: 'center',
   },
-  tagText: {
-    fontSize: 12,
-    color: colors.text.tertiary,
-    marginLeft: 6,
-    textTransform: 'capitalize',
-  },
-  actionRow: {
-    flexDirection: 'row',
-  },
-  iconBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: colors.background.tertiary,
+  actionCircle: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: 'white',
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: spacing.sm,
+    marginBottom: 25,
+  },
+  plusOverlay: {
+    position: 'absolute',
+    bottom: -5,
+    backgroundColor: '#FE2C55',
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'black',
+  },
+  actionBtn: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  iconContainer: {
+    width: 45,
+    height: 45,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  actionText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 2,
+    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  musicDisk: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#333',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 8,
+    borderColor: '#111',
+    marginTop: 10,
+  },
+  bottomNav: {
+    height: 60,
+    backgroundColor: 'black',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    borderTopWidth: 0.5,
+    borderTopColor: 'rgba(255,255,255,0.1)',
+  },
+  navItem: {
+    alignItems: 'center',
+  },
+  navText: {
+    color: 'white',
+    fontSize: 10,
+    marginTop: 4,
+    fontWeight: '600',
+  },
+  createMainBtn: {
+    width: 45,
+    height: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  plusIconBg: {
+    backgroundColor: 'white',
+    width: 38,
+    height: '100%',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 2,
+  },
+  plusLeftCyan: {
+    position: 'absolute',
+    left: 0,
+    width: 12,
+    height: '100%',
+    backgroundColor: '#25F4EE',
+    borderRadius: 8,
+    zIndex: 1,
+  },
+  plusRightRed: {
+    position: 'absolute',
+    right: 0,
+    width: 12,
+    height: '100%',
+    backgroundColor: '#FE2C55',
+    borderRadius: 8,
+    zIndex: 1,
   },
   loadingContainer: {
     flex: 1,
@@ -319,50 +417,30 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 40,
-    paddingBottom: 100,
-  },
-  emptyIconCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: colors.background.secondary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.xl,
-    borderWidth: 1,
-    borderColor: colors.background.glassBorder,
+    padding: 40,
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.text.primary,
-    marginBottom: spacing.sm,
+    color: 'white',
+    fontSize: 22,
+    fontWeight: '800',
+    marginTop: 20,
   },
   emptySubtitle: {
+    color: 'rgba(255,255,255,0.5)',
     fontSize: 14,
-    color: colors.text.secondary,
     textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: spacing.xxl,
+    marginTop: 10,
   },
-  createBtnLarge: {
-    flexDirection: 'row',
-    backgroundColor: colors.primary[600],
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    shadowColor: colors.primary[600],
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 15,
-    elevation: 8,
+  createBtnTikTok: {
+    backgroundColor: 'white',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 4,
+    marginTop: 30,
   },
-  createBtnTextLarge: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '700',
-    marginRight: 12,
+  createBtnTextTikTok: {
+    color: 'black',
+    fontWeight: '900',
+    fontSize: 15,
   },
 });

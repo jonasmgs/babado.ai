@@ -9,7 +9,7 @@ import {
   StatusBar,
 } from 'react-native';
 import { useAuthStore } from '@/store/useAuthStore';
-import { t } from '@/i18n';
+import { useTranslation } from '@/hooks/useTranslation';
 import { colors, spacing } from '@/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -19,6 +19,7 @@ interface ProfileScreenProps {
 
 export default function ProfileScreen({ onNavigate }: ProfileScreenProps) {
   const { user, logout } = useAuthStore();
+  const { t } = useTranslation();
 
   const handleLogout = async () => {
     await logout();
@@ -53,7 +54,7 @@ export default function ProfileScreen({ onNavigate }: ProfileScreenProps) {
           >
             <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Profile</Text>
+          <Text style={styles.headerTitle}>{t('dashboard.profile')}</Text>
           <TouchableOpacity 
             onPress={() => onNavigate('Settings')}
             style={styles.settingsBtn}
@@ -75,7 +76,7 @@ export default function ProfileScreen({ onNavigate }: ProfileScreenProps) {
           <View style={styles.statsRow}>
             <View style={styles.miniStat}>
               <Text style={styles.miniStatValue}>12</Text>
-              <Text style={styles.miniStatLabel}>Stories</Text>
+              <Text style={styles.miniStatLabel}>{t('home.myStories')}</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.miniStat}>
@@ -91,17 +92,17 @@ export default function ProfileScreen({ onNavigate }: ProfileScreenProps) {
         </View>
 
         <View style={styles.menuSection}>
-          <Text style={styles.sectionTitle}>Content Management</Text>
+          <Text style={styles.sectionTitle}>{t('home.myStories')}</Text>
           <MenuItem
             icon="document-text-outline"
-            label="My Stories"
-            color={colors.primary.neon}
+            label={t('home.myStories')}
+            color="#25F4EE"
             onPress={() => onNavigate('Home')}
           />
           <MenuItem
             icon="bar-chart-outline"
             label={t('dashboard.analytics')}
-            color="#ec4899"
+            color="#FE2C55"
             onPress={() => onNavigate('Analytics')}
           />
           <MenuItem
@@ -113,7 +114,7 @@ export default function ProfileScreen({ onNavigate }: ProfileScreenProps) {
         </View>
 
         <View style={styles.menuSection}>
-          <Text style={styles.sectionTitle}>Account</Text>
+          <Text style={styles.sectionTitle}>{t('dashboard.settings')}</Text>
           <MenuItem
             icon="notifications-outline"
             label={t('dashboard.notifications')}
@@ -132,7 +133,7 @@ export default function ProfileScreen({ onNavigate }: ProfileScreenProps) {
           onPress={handleLogout}
           style={styles.logoutBtn}
         >
-          <Ionicons name="log-out-outline" size={20} color="#f43f5e" />
+          <Ionicons name="log-out-outline" size={20} color="#FE2C55" />
           <Text style={styles.logoutBtnText}>{t('common.logout')}</Text>
         </TouchableOpacity>
       </ScrollView>

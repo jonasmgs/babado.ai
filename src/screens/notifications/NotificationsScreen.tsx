@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { supabase } from '@/services/supabase';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useTranslation } from '@/hooks/useTranslation';
 import { colors, spacing } from '@/constants/colors';
 import { Notification } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
@@ -23,12 +24,12 @@ export default function NotificationsScreen({ onNavigate }: NotificationsScreenP
   const { user } = useAuthStore();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { t, language } = useTranslation();
 
   useEffect(() => {
     if (user?.id) {
       fetchNotifications();
     } else {
-      // Se não tem usuário, para de carregar para não travar
       setIsLoading(false);
     }
   }, [user]);
@@ -63,13 +64,13 @@ export default function NotificationsScreen({ onNavigate }: NotificationsScreenP
   const getNotificationConfig = (type: string) => {
     switch (type) {
       case 'story_published':
-        return { icon: 'document-text', color: colors.primary.neon };
+        return { icon: 'document-text', color: '#25F4EE' };
       case 'milestone':
         return { icon: 'trophy', color: '#fbbf24' };
       case 'payment':
         return { icon: 'card', color: '#10b981' };
       default:
-        return { icon: 'notifications', color: colors.secondary[400] };
+        return { icon: 'notifications', color: '#FE2C55' };
     }
   };
 
@@ -90,7 +91,7 @@ export default function NotificationsScreen({ onNavigate }: NotificationsScreenP
           <Text style={styles.notiTitle}>{notification.title}</Text>
           <Text style={styles.notiMessage}>{notification.message}</Text>
           <Text style={styles.notiTime}>
-            {new Date(notification.createdAt).toLocaleDateString()}
+            {new Date(notification.createdAt).toLocaleDateString(language === 'pt' ? 'pt-BR' : 'en-US')}
           </Text>
         </View>
         {!notification.read && <View style={styles.unreadDot} />}
@@ -113,23 +114,23 @@ export default function NotificationsScreen({ onNavigate }: NotificationsScreenP
           >
             <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Notifications</Text>
+          <Text style={styles.headerTitle}>{t('dashboard.notifications')}</Text>
           <View style={{ width: 40 }} />
         </View>
 
         <View style={styles.content}>
           {isLoading ? (
             <View style={styles.centerContainer}>
-              <ActivityIndicator size="large" color={colors.primary.neon} />
+              <ActivityIndicator size="large" color="#25F4EE" />
             </View>
           ) : notifications.length === 0 ? (
             <View style={styles.centerContainer}>
               <View style={styles.emptyIconCircle}>
                 <Ionicons name="notifications-off-outline" size={40} color={colors.text.tertiary} />
               </View>
-              <Text style={styles.emptyTitle}>Silêncio por aqui...</Text>
+              <Text style={styles.emptyTitle}>{language === 'pt' ? 'Silêncio por aqui...' : 'All quiet here...'}</Text>
               <Text style={styles.emptySubtitle}>
-                Suas atualizações mágicas aparecerão aqui em breve.
+                {language === 'pt' ? 'Suas atualizações mágicas aparecerão aqui em breve.' : 'Your magic updates will appear here soon.'}
               </Text>
             </View>
           ) : (
@@ -188,8 +189,8 @@ const styles = StyleSheet.create({
     borderColor: colors.background.glassBorder,
   },
   notiUnread: {
-    borderColor: colors.primary.neon + '40',
-    backgroundColor: colors.primary[700] + '10',
+    borderColor: '#25F4EE40',
+    backgroundColor: 'rgba(37, 244, 238, 0.05)',
   },
   notiRead: {
     opacity: 0.8,
@@ -225,7 +226,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.primary.neon,
+    backgroundColor: '#FE2C55',
     marginLeft: 10,
   },
   centerContainer: {

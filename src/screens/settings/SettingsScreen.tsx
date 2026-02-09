@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -8,25 +8,35 @@ import {
   StyleSheet,
   SafeAreaView,
   StatusBar,
+  Alert,
 } from 'react-native';
-import I18n, { setLanguage } from '@/i18n';
+import { useSettingsStore } from '@/store/useSettingsStore';
+import { useTranslation } from '@/hooks/useTranslation';
 import { colors, spacing } from '@/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
-import { Alert } from 'react-native';
 
 interface SettingsScreenProps {
   onNavigate: (screen: string, data?: any) => void;
 }
 
 export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
-  const [language, setLanguageState] = useState('en');
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
+  const { 
+    language, 
+    setLanguage, 
+    darkMode, 
+    setDarkMode, 
+    notificationsEnabled, 
+    setNotificationsEnabled 
+  } = useSettingsStore();
+  
+  const { t } = useTranslation();
 
   const handleLanguageChange = (lang: 'en' | 'pt') => {
-    setLanguageState(lang);
     setLanguage(lang);
-    Alert.alert('Language Updated', `Application language changed to ${lang === 'en' ? 'English' : 'Português'}.`);
+    Alert.alert(
+      lang === 'en' ? 'Language Updated' : 'Idioma Atualizado', 
+      lang === 'en' ? 'Application language changed to English.' : 'O idioma do aplicativo foi alterado para Português.'
+    );
   };
 
   const showInfo = (title: string, content: string) => {
@@ -41,7 +51,7 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
     hasToggle = false,
     toggleValue = false,
     onToggle,
-    color = colors.primary.neon,
+    color = '#25F4EE', // TikTok Cyan
   }: any) => (
     <TouchableOpacity
       onPress={onPress}
@@ -59,8 +69,8 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
         <Switch
           value={toggleValue}
           onValueChange={onToggle}
-          trackColor={{ false: '#334155', true: colors.primary.neon + '40' }}
-          thumbColor={toggleValue ? colors.primary.neon : '#94a3b8'}
+          trackColor={{ false: '#334155', true: '#FE2C5580' }} // TikTok Red semi-transparent
+          thumbColor={toggleValue ? '#FE2C55' : '#94a3b8'} // TikTok Red
         />
       ) : (
         onPress && <Ionicons name="chevron-forward" size={18} color={colors.text.tertiary} />
@@ -83,61 +93,54 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
           >
             <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Settings</Text>
+          <Text style={styles.headerTitle}>{t('dashboard.settings')}</Text>
           <View style={{ width: 40 }} />
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Preferences</Text>
+          <Text style={styles.sectionTitle}>{language === 'en' ? 'Preferences' : 'Preferências'}</Text>
           <SettingItem
             icon="language-outline"
-            label="Language"
+            label={language === 'en' ? 'Language' : 'Idioma'}
             value={language === 'en' ? 'English' : 'Português'}
             onPress={() => handleLanguageChange(language === 'en' ? 'pt' : 'en')}
-            color="#6366f1"
+            color="#25F4EE" // TikTok Cyan
           />
 
           <SettingItem
             icon="notifications-outline"
-            label="Notifications"
+            label={t('dashboard.notifications')}
             hasToggle
             toggleValue={notificationsEnabled}
             onToggle={setNotificationsEnabled}
-            color="#ec4899"
+            color="#FE2C55" // TikTok Red
           />
 
           <SettingItem
             icon="moon-outline"
-            label="Dark Mode"
+            label={language === 'en' ? 'Dark Mode' : 'Modo Escuro'}
             hasToggle
             toggleValue={darkMode}
             onToggle={setDarkMode}
-            color="#8b5cf6"
+            color="#A78BFA"
           />
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About</Text>
+          <Text style={styles.sectionTitle}>{language === 'en' ? 'About' : 'Sobre'}</Text>
           <SettingItem
             icon="information-circle-outline"
             label="About Babado.ai"
-            value="Version 1.1.0"
-            onPress={() => showInfo('About Babado.ai', 'The ultimate storytelling app powered by AI. Create, rewrite, and share viral stories across social media!')}
+            value="Version 1.2.0 (TikTok Edition)"
+            onPress={() => showInfo('About Babado.ai', 'The ultimate storytelling app. TikTok style!')}
             color="#64748b"
           />
 
           <SettingItem
             icon="shield-checkmark-outline"
-            label="Privacy Policy"
-            onPress={() => showInfo('Privacy Policy', 'Your privacy is our priority. We only use your data to improve your storytelling experience.')}
+            label={language === 'en' ? 'Privacy Policy' : 'Política de Privacidade'}
+            onPress={() => showInfo('Privacy Policy', 'Your data is safe.')}
             color="#10b981"
-          />
-
-          <SettingItem
-            icon="document-text-outline"
-            label="Terms of Service"
-            onPress={() => showInfo('Terms of Service', 'By using Babado.ai, you agree to create respectful content and follow social media platform guidelines.')}
-            color="#f59e0b"
           />
         </View>
       </ScrollView>

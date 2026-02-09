@@ -11,7 +11,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useAuthStore } from '@/store/useAuthStore';
-import { t } from '@/i18n';
+import { useTranslation } from '@/hooks/useTranslation';
 import { colors, spacing } from '@/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -23,6 +23,7 @@ export default function LoginScreen({ onNavigate }: LoginScreenProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login, isLoading, error, clearError } = useAuthStore();
+  const { t, language } = useTranslation();
 
   const handleLogin = async () => {
     clearError();
@@ -44,10 +45,10 @@ export default function LoginScreen({ onNavigate }: LoginScreenProps) {
         <View style={styles.content}>
           <View style={styles.header}>
             <View style={styles.logoBadge}>
-              <Ionicons name="flash" size={32} color={colors.primary.neon} />
+              <Ionicons name="flash" size={32} color="#25F4EE" />
             </View>
-            <Text style={styles.title}>Welcome Back</Text>
-            <Text style={styles.subtitle}>Sign in to continue your viral journey</Text>
+            <Text style={styles.title}>{language === 'pt' ? 'Bem-vindo de volta' : 'Welcome Back'}</Text>
+            <Text style={styles.subtitle}>{language === 'pt' ? 'Entre para continuar sua jornada viral' : 'Sign in to continue your viral journey'}</Text>
           </View>
 
           {error && (
@@ -90,7 +91,7 @@ export default function LoginScreen({ onNavigate }: LoginScreenProps) {
                 />
               </View>
               <TouchableOpacity style={styles.forgotPass}>
-                <Text style={styles.forgotText}>Forgot password?</Text>
+                <Text style={styles.forgotText}>{language === 'pt' ? 'Esqueceu a senha?' : 'Forgot password?'}</Text>
               </TouchableOpacity>
             </View>
 
@@ -110,9 +111,9 @@ export default function LoginScreen({ onNavigate }: LoginScreenProps) {
             </TouchableOpacity>
 
             <View style={styles.registerLink}>
-              <Text style={styles.registerText}>Don't have an account? </Text>
+              <Text style={styles.registerText}>{language === 'pt' ? 'Não tem uma conta?' : "Don't have an account?"} </Text>
               <TouchableOpacity onPress={() => onNavigate('Register')}>
-                <Text style={styles.registerAction}>Sign Up</Text>
+                <Text style={styles.registerAction}>{language === 'pt' ? 'Cadastre-se' : 'Sign Up'}</Text>
               </TouchableOpacity>
             </View>
           </View>
