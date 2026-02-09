@@ -12,14 +12,15 @@ export class AudioPlayer {
    */
   async load(uri: string): Promise<void> {
     if (Platform.OS === 'web') {
-      console.log('Audio loading skipped on web');
-      return;
+      throw new Error('Audio playback is not supported on web platform');
     }
+    
     try {
       // Unload previous sound if exists
       if (this.sound) {
         await this.unload();
       }
+
 
       const { sound } = await Audio.Sound.createAsync(
         { uri },
@@ -178,8 +179,12 @@ export async function shareAudio(uri: string): Promise<void> {
  */
 export async function downloadAudio(uri: string, fileName: string): Promise<string> {
   try {
-    const docDir = FileSystem.documentDirectory || '';
+    const docDir = FileSystem.documentDirectory;
+    if (!docDir) {
+      throw new Error('Document directory is not available');
+    }
     const downloadUri = `${docDir}${fileName}`;
+
 
     if (Platform.OS === 'web') {
       console.log('Audio download skipped on web:', uri);

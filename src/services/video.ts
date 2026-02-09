@@ -1,11 +1,6 @@
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { supabase } from './supabase';
-import { Platform } from 'react-native';
-
-const documentDirectory = FileSystem.documentDirectory || '';
-const EncodingType = FileSystem.EncodingType;
-
 export interface VideoExportOptions {
   storyId: string;
   userId: string;
@@ -20,6 +15,10 @@ export interface VideoExportOptions {
  * In a production app, this would use FFmpeg or a server-side rendering service
  */
 export async function compositeVideo(options: VideoExportOptions): Promise<string> {
+  if (!documentDirectory) {
+    throw new Error('Document directory is not available');
+  }
+
   try {
     console.log('Compositing video with options:', options);
     
@@ -29,11 +28,11 @@ export async function compositeVideo(options: VideoExportOptions): Promise<strin
     // For now, we return a mock URI or the background image/color representation
     // in a real app, this would be the actual .mp4 file URI
     const filename = `video_${options.storyId}_${Date.now()}.mp4`;
-    const videoUri = `${FileSystem.documentDirectory}${filename}`;
+    const videoUri = `${documentDirectory}${filename}`;
     
     // Create a dummy file for simulation
     await FileSystem.writeAsStringAsync(videoUri, 'Dummy Video Content', {
-      encoding: FileSystem.EncodingType.UTF8,
+      encoding: EncodingType.UTF8,
     });
     
     return videoUri;
@@ -42,6 +41,7 @@ export async function compositeVideo(options: VideoExportOptions): Promise<strin
     throw new Error('Failed to composite video');
   }
 }
+
 
 /**
  * Upload video to Supabase Storage

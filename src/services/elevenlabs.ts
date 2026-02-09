@@ -3,9 +3,8 @@ import * as FileSystem from 'expo-file-system';
 import { supabase } from './supabase';
 import { Platform } from 'react-native';
 
-const documentDirectory = FileSystem.documentDirectory || '';
-
 const ELEVENLABS_API_KEY = process.env.EXPO_PUBLIC_ELEVENLABS_API_KEY || '';
+
 const ELEVENLABS_API_URL = 'https://api.elevenlabs.io/v1';
 
 export interface Voice {
@@ -49,6 +48,15 @@ export async function generateSpeech(
   voiceId: string,
   settings?: VoiceSettings
 ): Promise<string> {
+  if (Platform.OS === 'web') {
+    throw new Error('ElevenLabs text-to-speech is not supported on web platform');
+  }
+
+  const documentDirectory = FileSystem.documentDirectory;
+  if (!documentDirectory) {
+    throw new Error('Document directory is not available');
+  }
+
   try {
     const defaultSettings: VoiceSettings = {
       stability: 0.5,
@@ -78,11 +86,6 @@ export async function generateSpeech(
     const filename = `voice_${Date.now()}.mp3`;
     const fileUri = `${documentDirectory}${filename}`;
 
-    if (Platform.OS === 'web') {
-      console.log('Audio generation simulated on web:', text);
-      return 'https://example.com/dummy.mp3';
-    }
-
     await FileSystem.writeAsStringAsync(
       fileUri,
       Buffer.from(response.data).toString('base64'),
@@ -97,6 +100,7 @@ export async function generateSpeech(
     throw new Error('Failed to generate speech');
   }
 }
+
 
 /**
  * Upload audio file to Supabase Storage

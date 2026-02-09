@@ -26,12 +26,18 @@ type Screen = 'Login' | 'Register' | 'Home' | 'StoryEditor' | 'StoryDetail' | 'P
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('Onboarding');
   const [isInitializing, setIsInitializing] = useState(true);
+  const isInitializingRef = React.useRef(true);
   const { user, fetchUser } = useAuthStore();
+
+  useEffect(() => {
+    // Sync ref with state
+    isInitializingRef.current = isInitializing;
+  }, [isInitializing]);
 
   useEffect(() => {
     // Add a safety timeout to prevent hanging initialization on web
     const timer = setTimeout(() => {
-      if (isInitializing) {
+      if (isInitializingRef.current) {
         console.warn('Initialization timed out, defaulting to Login');
         setIsInitializing(false);
         setCurrentScreen('Login');
@@ -76,7 +82,7 @@ export default function App() {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background.primary, padding: 20 }}>
         <ActivityIndicator size="large" color={colors.primary[700]} />
-        {Platform.OS === 'web' && (
+        {Platform.OS === 'web' && __DEV__ && (
           <>
             <Text style={{ marginTop: 20, color: colors.text.secondary }}>
               Initializing Babado.ai...
@@ -98,6 +104,7 @@ export default function App() {
   }
 
   useNotifications();
+
 
   const nav = (screen: string) => handleNavigate(screen as Screen);
 
