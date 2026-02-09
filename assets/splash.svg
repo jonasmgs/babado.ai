@@ -1,0 +1,43 @@
+<svg width="1284" height="2778" viewBox="0 0 1284 2778" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6d28d9;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1284" height="2778" fill="url(#bgGrad)"/>
+  
+  <!-- Centered Logo Icon -->
+  <g transform="translate(342, 1139)">
+    <!-- Speech Bubble -->
+    <path d="M 100 100 Q 100 50 140 50 L 460 50 Q 500 50 500 100 L 500 320 Q 500 370 460 370 L 280 370 L 200 470 L 200 370 L 140 370 Q 100 370 100 320 Z" 
+          fill="white" opacity="0.95"/>
+    
+    <!-- AI Circuit -->
+    <circle cx="230" cy="175" r="24" fill="#7c3aed"/>
+    <circle cx="370" cy="175" r="24" fill="#7c3aed"/>
+    <circle cx="300" cy="275" r="24" fill="#7c3aed"/>
+    
+    <line x1="230" y1="175" x2="300" y2="275" stroke="#7c3aed" stroke-width="6" stroke-linecap="round"/>
+    <line x1="370" y1="175" x2="300" y2="275" stroke="#7c3aed" stroke-width="6" stroke-linecap="round"/>
+    <line x1="230" y1="175" x2="370" y2="175" stroke="#7c3aed" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  
+  <!-- App Name -->
+  <text x="642" y="1700" font-family="Arial, sans-serif" font-size="72" font-weight="bold" 
+        text-anchor="middle" fill="white">Babado.ai</text>
+  <text x="642" y="1770" font-family="Arial, sans-serif" font-size="36" 
+        text-anchor="middle" fill="white" opacity="0.9">Viral Story Creator</text>
+  
+  <!-- Sparkles -->
+  <path d="M 200 800 L 210 830 L 240 840 L 210 850 L 200 880 L 190 850 L 160 840 L 190 830 Z" 
+        fill="white" opacity="0.7"/>
+  <path d="M 1084 950 L 1094 980 L 1124 990 L 1094 1000 L 1084 1030 L 1074 1000 L 1044 990 L 1074 980 Z" 
+        fill="white" opacity="0.7"/>
+  <path d="M 150 1900 L 160 1930 L 190 1940 L 160 1950 L 150 1980 L 140 1950 L 110 1940 L 140 1930 Z" 
+        fill="#f97316" opacity="0.8"/>
+  <path d="M 1100 2000 L 1110 2030 L 1140 2040 L 1110 2050 L 1100 2080 L 1090 2050 L 1060 2040 L 1090 2030 Z" 
+        fill="#22c55e" opacity="0.8"/>
+</svg>

@@ -1,0 +1,36 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6d28d9;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#a78bfa;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="512" cy="512" r="480" fill="url(#grad1)"/>
+  
+  <!-- Speech Bubble representing stories -->
+  <path d="M 312 312 Q 312 262 352 262 L 672 262 Q 712 262 712 312 L 712 532 Q 712 582 672 582 L 492 582 L 412 682 L 412 582 L 352 582 Q 312 582 312 532 Z" 
+        fill="white" opacity="0.95"/>
+  
+  <!-- AI Circuit Pattern inside -->
+  <circle cx="442" cy="387" r="28" fill="url(#grad2)"/>
+  <circle cx="582" cy="387" r="28" fill="url(#grad2)"/>
+  <circle cx="512" cy="487" r="28" fill="url(#grad2)"/>
+  
+  <line x1="442" y1="387" x2="512" y2="487" stroke="url(#grad2)" stroke-width="8" stroke-linecap="round"/>
+  <line x1="582" y1="387" x2="512" y2="487" stroke="url(#grad2)" stroke-width="8" stroke-linecap="round"/>
+  <line x1="442" y1="387" x2="582" y2="387" stroke="url(#grad2)" stroke-width="8" stroke-linecap="round"/>
+  
+  <!-- Sparkles for viral/trending -->
+  <path d="M 742 212 L 752 242 L 782 252 L 752 262 L 742 292 L 732 262 L 702 252 L 732 242 Z" 
+        fill="#f97316" opacity="0.9"/>
+  <path d="M 262 662 L 272 692 L 302 702 L 272 712 L 262 742 L 252 712 L 222 702 L 252 692 Z" 
+        fill="#22c55e" opacity="0.9"/>
+  <path d="M 812 562 L 822 592 L 852 602 L 822 612 L 812 642 L 802 612 L 772 602 L 802 592 Z" 
+        fill="#fbbf24" opacity="0.9"/>
+</svg>
