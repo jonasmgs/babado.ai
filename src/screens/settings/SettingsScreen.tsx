@@ -8,6 +8,8 @@ import {
 } from 'react-native';
 import I18n, { setLanguage } from '@/i18n';
 import { colors, spacing } from '@/constants/colors';
+import { Ionicons } from '@expo/vector-icons';
+import { Alert } from 'react-native';
 
 interface SettingsScreenProps {
   onNavigate: (screen: string) => void;
@@ -21,6 +23,11 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
   const handleLanguageChange = (lang: 'en' | 'pt') => {
     setLanguageState(lang);
     setLanguage(lang);
+    Alert.alert('Language Updated', `Application language changed to ${lang === 'en' ? 'English' : 'Português'}.`);
+  };
+
+  const showInfo = (title: string, content: string) => {
+    Alert.alert(title, content);
   };
 
   const SettingItem = ({
@@ -66,6 +73,8 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
     <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }}>
       <View
         style={{
+          flexDirection: 'row',
+          alignItems: 'center',
           paddingHorizontal: spacing.lg,
           paddingVertical: spacing.lg,
           backgroundColor: colors.background.secondary,
@@ -73,6 +82,12 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
           borderBottomColor: colors.neutral[200],
         }}
       >
+        <TouchableOpacity 
+          onPress={() => onNavigate('Home')}
+          style={{ marginRight: spacing.md }}
+        >
+          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+        </TouchableOpacity>
         <Text
           style={{
             fontSize: 28,
@@ -101,7 +116,7 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
           icon="🌍"
           label="Language"
           value={language === 'en' ? 'English' : 'Português'}
-          onPress={() => {}}
+          onPress={() => handleLanguageChange(language === 'en' ? 'pt' : 'en')}
         />
 
         <SettingItem
@@ -187,19 +202,19 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
           icon="ℹ️"
           label="About Babado.ai"
           value="Version 1.0.0"
-          onPress={() => {}}
+          onPress={() => showInfo('About Babado.ai', 'The ultimate storytelling app powered by AI. Create, rewrite, and share viral stories across social media!')}
         />
 
         <SettingItem
           icon="📋"
           label="Privacy Policy"
-          onPress={() => {}}
+          onPress={() => showInfo('Privacy Policy', 'Your privacy is our priority. We only use your data to improve your storytelling experience. No information is sold to third parties.')}
         />
 
         <SettingItem
           icon="⚖️"
           label="Terms of Service"
-          onPress={() => {}}
+          onPress={() => showInfo('Terms of Service', 'By using Babado.ai, you agree to create respectful content and follow social media platform guidelines.')}
         />
       </View>
     </ScrollView>

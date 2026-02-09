@@ -11,6 +11,7 @@ import { supabase } from '@/services/supabase';
 import { useAuthStore } from '@/store/useAuthStore';
 import { colors, spacing } from '@/constants/colors';
 import { Notification } from '@/types';
+import { Ionicons } from '@expo/vector-icons';
 
 interface NotificationsScreenProps {
   onNavigate: (screen: string) => void;
@@ -140,16 +141,23 @@ export default function NotificationsScreen({ onNavigate }: NotificationsScreenP
       style={{ flex: 1, backgroundColor: colors.background.secondary }}
       contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingVertical: spacing.lg }}
     >
-      <Text
-        style={{
-          fontSize: 28,
-          fontWeight: 'bold',
-          color: colors.text.primary,
-          marginBottom: spacing.lg,
-        }}
-      >
-        🔔 Notifications
-      </Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.lg }}>
+        <TouchableOpacity 
+          onPress={() => onNavigate('Home')}
+          style={{ marginRight: spacing.md }}
+        >
+          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+        </TouchableOpacity>
+        <Text
+          style={{
+            fontSize: 28,
+            fontWeight: 'bold',
+            color: colors.text.primary,
+          }}
+        >
+          🔔 Notifications
+        </Text>
+      </View>
 
       {notifications.length === 0 ? (
         <EmptyState />

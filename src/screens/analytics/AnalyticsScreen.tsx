@@ -3,11 +3,13 @@ import {
   View,
   Text,
   ScrollView,
+  TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useStoryStore } from '@/store/useStoryStore';
 import { colors, spacing } from '@/constants/colors';
+import { Ionicons } from '@expo/vector-icons';
 
 interface AnalyticsScreenProps {
   onNavigate: (screen: string) => void;
@@ -81,16 +83,23 @@ export default function AnalyticsScreen({ onNavigate }: AnalyticsScreenProps) {
       style={{ flex: 1, backgroundColor: colors.background.secondary }}
       contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingVertical: spacing.lg }}
     >
-      <Text
-        style={{
-          fontSize: 28,
-          fontWeight: 'bold',
-          color: colors.text.primary,
-          marginBottom: spacing.lg,
-        }}
-      >
-        📊 Analytics
-      </Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.lg }}>
+        <TouchableOpacity 
+          onPress={() => onNavigate('Home')}
+          style={{ marginRight: spacing.md }}
+        >
+          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+        </TouchableOpacity>
+        <Text
+          style={{
+            fontSize: 28,
+            fontWeight: 'bold',
+            color: colors.text.primary,
+          }}
+        >
+          📊 Analytics
+        </Text>
+      </View>
 
       <StatBox label="Total Stories" value={stats.totalStories} />
       <StatBox label="Published Stories" value={stats.publishedStories} />

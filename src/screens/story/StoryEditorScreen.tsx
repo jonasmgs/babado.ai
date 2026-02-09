@@ -13,6 +13,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { t } from '@/i18n';
 import { colors, spacing } from '@/constants/colors';
 import { EmotionalTone } from '@/types';
+import { Ionicons } from '@expo/vector-icons';
 
 interface StoryEditorScreenProps {
   onNavigate: (screen: string) => void;
@@ -111,16 +112,23 @@ export default function StoryEditorScreen({ onNavigate }: StoryEditorScreenProps
       style={{ flex: 1, backgroundColor: colors.background.primary }}
       contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingVertical: spacing.lg }}
     >
-      <Text
-        style={{
-          fontSize: 24,
-          fontWeight: 'bold',
-          color: colors.text.primary,
-          marginBottom: spacing.lg,
-        }}
-      >
-        ✨ Create Your Story
-      </Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.lg }}>
+        <TouchableOpacity 
+          onPress={() => onNavigate('Home')}
+          style={{ marginRight: spacing.md }}
+        >
+          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+        </TouchableOpacity>
+        <Text
+          style={{
+            fontSize: 24,
+            fontWeight: 'bold',
+            color: colors.text.primary,
+          }}
+        >
+          ✨ Create Your Story
+        </Text>
+      </View>
 
       <View style={{ marginBottom: spacing.lg }}>
         <Text style={{ fontSize: 12, fontWeight: '600', color: colors.text.secondary, marginBottom: spacing.sm }}>

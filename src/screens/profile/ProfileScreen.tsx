@@ -9,6 +9,7 @@ import {
 import { useAuthStore } from '@/store/useAuthStore';
 import { t } from '@/i18n';
 import { colors, spacing } from '@/constants/colors';
+import { Ionicons } from '@expo/vector-icons';
 
 interface ProfileScreenProps {
   onNavigate: (screen: string) => void;
@@ -48,6 +49,8 @@ export default function ProfileScreen({ onNavigate }: ProfileScreenProps) {
     <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }}>
       <View
         style={{
+          flexDirection: 'row',
+          alignItems: 'center',
           paddingHorizontal: spacing.lg,
           paddingVertical: spacing.xl,
           backgroundColor: colors.primary[50],
@@ -55,23 +58,31 @@ export default function ProfileScreen({ onNavigate }: ProfileScreenProps) {
           borderBottomColor: colors.neutral[200],
         }}
       >
-        <View
-          style={{
-            width: 80,
-            height: 80,
-            borderRadius: 40,
-            backgroundColor: colors.primary[200],
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginBottom: spacing.md,
-          }}
+        <TouchableOpacity 
+          onPress={() => onNavigate('Home')}
+          style={{ marginRight: spacing.md }}
         >
-          <Text style={{ fontSize: 40 }}>👤</Text>
+          <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+        </TouchableOpacity>
+        <View style={{ flex: 1 }}>
+          <View
+            style={{
+              width: 80,
+              height: 80,
+              borderRadius: 40,
+              backgroundColor: colors.primary[200],
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginBottom: spacing.xs,
+            }}
+          >
+            <Text style={{ fontSize: 40 }}>👤</Text>
+          </View>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.text.primary, marginBottom: spacing.sm }}>
+            {user?.username || 'User'}
+          </Text>
+          <Text style={{ fontSize: 14, color: colors.text.secondary }}>{user?.email}</Text>
         </View>
-        <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.text.primary, marginBottom: spacing.sm }}>
-          {user?.username || 'User'}
-        </Text>
-        <Text style={{ fontSize: 14, color: colors.text.secondary }}>{user?.email}</Text>
       </View>
 
       <View style={{ paddingVertical: spacing.lg }}>
